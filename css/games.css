@@ -79,7 +79,7 @@ body {
 ;  }
 
   .view-image img {
-    height: 90%;
+    width: 80%;
     border-radius: 1rem;
   }
   .view-image span {
