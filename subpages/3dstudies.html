@@ -7,7 +7,7 @@
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-        <link rel="stylesheet" href="/css/games.css">
+        <link rel="stylesheet" href="../css/moomin.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/octicons/12.1.0/font/octicons.min.css">
     </head>
     <body>
@@ -19,7 +19,7 @@
                             <div class="col-5">
                                 <div class="row" style="text-align:left">
                                 
-                                <a href="/index.html" style="text-decoration: none; color: black;">
+                                <a href="index.html" style="text-decoration: none; color: black;">
                                     <h1 style=" font-size: 20px; ">rebecca feng</h1>
                                 </a>
                                     <div class="socials">
@@ -29,10 +29,10 @@
                                             </svg>
                                         </a> 
                                         <a href="https://www.linkedin.com/in/rebecca-feng-2556781b6/">
-                                            <img src="/webimahes/linkedin.png" class="social linkedin">
+                                            <img src="webimahes/linkedin.png" class="social linkedin">
                                         </a>
                                         <a href="https://sylphanru.itch.io">
-                                            <img src="/webimahes/itchio.png" class="social itchio">
+                                            <img src="webimahes/itchio.png" class="social itchio">
                                         </a>
                                     </div>
                                 </div>
@@ -48,7 +48,7 @@
                         <ul class="menubar">
                    
                             <li>
-                                <a href="code.html">
+                                <a href="subpages/code.html">
                                     code
                                 </a>
                             </li>
@@ -57,9 +57,9 @@
                                     3d
                                 </a>
                                 <ul class="dropdown">
-                                    <li><a href="twasanight.html">twas a night (2023)</a></li>
-                                    <li><a href="games.html">home for anderson (2023)</a></li>
-                                    <li><a href="3dstudies.html">studies</a></li>
+                                    <li><a href="subpages/twasanight.html">twas a night (2023)</a></li>
+                                    <li><a href="subpages/games.html">games</a></li>
+                                    <li><a href="subpages/3dstudies.html">studies</a></li>
                                 </ul>
                             </li>
                             <li>
@@ -67,12 +67,12 @@
                                     2d
                                 </a>
                                 <ul class="dropdown">
-                                <li><a href="astroclub.html">astro club</a></li>
-                                    <li><a href="pleinair.html">plein-air</a></li>
+                                <li><a href="subpages/astroclub.html">astro club</a></li>
+                                    <li><a href="subpages/pleinair.html">plein-air</a></li>
                                 </ul>
                             </li>
                             <li>
-                                <a href="/about.html">
+                                <a href="about.html">
                                     about
                                 </a>
                             </li>
@@ -83,26 +83,25 @@
                 </div>
             
                 <h4 style="font-family: Futura; justify-content: center; text-align:center;">3D studies</h4>
-                <p style="font-family: Futura; justify-content: center; text-align:center;">I pulled the Aang model and rig from <a href="https://agora.community/content/aang">here</a></p>
                 <div class="image-container row d-flex" style="justify-content: center; align-items: center;  
                 height:auto;
                 margin:0px auto;">
-                <img src="/3dstudies/FoxRunningScene1.mp4">
-                    <img src="/3dstudies/0001-0152.mp4">
-                    <img src="/3dstudies/a_room_video.mp4">
-                    <img src="/3dstudies/aangfinal.mov">
-
+                    <img src="/3dstudies/0001-0152.mp4" alt="">
+                    <img src="/3dstudies/a_room_video.mp4" alt="">
+                    <img src="/3dstudies/FoxRunningScene1.mp4" alt="">
+                    <img src="/3dstudies/aangfinal.mov" alt="">
                 </div>
     
-            </div>
+                </div>
         
        
             <div class="view-image">
-                <img src="/webimahes/profile.PNG" alt="">
+                <img src="webimahes/profile.PNG" alt="">
                 <span>x</span>
             </div>
             
         </div>
+        <script src="scripts/fade.js"></script>
         <script>
             let images=document.querySelectorAll(".image-container img");
             let viewImage= document.querySelector(".view-image");
