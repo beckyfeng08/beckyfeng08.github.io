@@ -1,0 +1,27 @@
+.fade-in {
+    opacity: 0; /* Start with element invisible */
+    animation: fadeInAnimation 1s ease-in forwards; /* Animation properties */
+}
+
+@keyframes fadeInAnimation {
+    from {
+        opacity: 0; /* Element is fully transparent */
+    }
+    to {
+        opacity: 1; /* Element becomes fully opaque */
+    }
+}
+
+body {
+    transform: translateY(-50px); /* Initial position above the final position */
+    animation: moveDownAnimation 1s forwards ease-in-out; /* Define animation */
+  }
+  
+  @keyframes moveDownAnimation {
+    from {
+      transform: translateY(-50px); /* Initial position above the final position */
+    }
+    to {
+      transform: translateY(0); /* Final position */
+    }
+  }

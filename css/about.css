@@ -1,0 +1,208 @@
+
+ul {
+  list-style: none;
+}
+a {
+  color: rgb(120, 138, 121); /* Change the color to black */
+  text-decoration: underline; /* Add underline */
+}
+hr {
+  border: 1px solid burlywood;
+}
+a:hover {
+  color:black;
+}
+button {
+  background-color: rgb(226, 196, 155);
+  
+  border: none;
+}
+button:hover {
+  background-color:burlywood;
+}
+
+
+body {
+  font-family: 'Futura';
+    margin: 0;
+    display: flex;
+    height: 100vh;
+    background-size:cover;
+    background-image: url("../webimahes/background.png");
+   
+  }
+  .container-fluid {
+    width: 90%; 
+    justify-content: center;
+    text-align: center;
+    font-family: Futura;
+  }
+  .row:before .row:after{
+    display:inline-block;
+  }
+  .main {
+    margin: auto;
+    max-width: 800px;
+   
+  }
+  .image-container {
+    position: relative;
+  }
+ 
+  #profilepic {
+    margin: 20px;
+    width: 400px;
+    filter:drop-shadow(-5px 5px 5px rgb(189, 189, 189));
+    transform:rotate(-5deg);
+    z-index: 1;
+    transition: 0.5s;
+}
+#profilepic:hover {
+  transform:rotate(-2deg);
+}
+
+#actualpic {
+  margin: -90px;
+  width: 250px;
+  text-align: center;
+  transform: rotate(10deg);
+  filter:drop-shadow(-5px 5px 5px rgba(0, 0, 0, 0.6));
+  z-index: 2;
+}
+#catpic {
+  width: 200px;
+  transform:translate(-90px, 200px) rotate(-20deg);
+  filter:drop-shadow(-5px 5px 5px rgba(0, 0, 0, 0.6));
+  z-index: 1;
+  position: absolute;
+  
+
+}
+
+#clickme {
+  width:150px;
+  position:absolute;
+  z-index:2;
+  transform: translate(-90px, 40px);
+}
+
+.hidden {
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+#ucberkeley2025 {
+  color:rgb(131, 131, 131);
+}
+.gallery {
+  margin:20px;
+  
+}
+.galleryimg {
+  margin:5px;
+  width:30cap;
+  align-items: flex-start;
+}
+
+.galleryimglarge {
+  margin:5px;
+  width:100%;
+  align-items: flex-start;
+  
+}
+
+.page-divider-small {
+    width: 100%;
+    height: 50px;
+}
+
+.page-divider-large {
+  width: 100%;
+    height: 100px;
+}
+
+  #rightside {
+    text-align:left;
+  }
+  #leftside {
+    max-width: 500px;
+  }
+ 
+  .social:hover {
+    transform:scale(110%);
+  }
+
+  .itchio {
+    width:20px;
+    margin-left: 8px;
+  }
+  .linkedin {
+    width:20px;
+    margin-left: 8px;
+  }
+  .socials {
+    margin-left: 20px;
+
+  }
+  .main .row .col .socials {
+    margin-left:0px;
+  } 
+  .main .row .col .socials img {
+width:30px;
+  }
+
+  .heading {
+    text-align: left; 
+    font-family:Playfair Display;
+    max-width: 2000px;
+  }
+  .menubar {
+    text-align: right;
+
+    max-width: 800px;
+    list-style-type: none; /* Remove default list styles */
+    display: flex; /* Display list items in a row */
+    justify-content: center;
+    margin-top: -10px;
+    margin-left:100px;
+  }
+  .menubar li {
+    padding: 15px 20px; 
+    margin-right: 50px;
+    font-family: Futura;
+    font-style:italic;
+  }
+  .menubar a {
+    text-decoration: none;
+    color: gray;
+  }
+  
+
+  .dropdown li {
+    display: block;
+    margin:0;
+    padding: 0;
+    position:relative;
+    margin:20px;
+    margin-left: -20px;
+  }
+
+
+.dropdown {
+  width:auto;
+  text-align:left;
+  position:absolute;
+  z-index: 4;
+  display:none;
+  transform: translateX(-1.23rem);
+  
+}  
+.menubar li:hover .dropdown{
+  display:block;
+  margin-top:15px;
+  background-color:rgba(255, 252, 242, 0.8);
+}
+.menubar li:hover{
+  display:block;
+  background-color:rgb(238, 215, 184, 0.7);
+  cursor:pointer;
+}
