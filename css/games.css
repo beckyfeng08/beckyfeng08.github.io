@@ -76,8 +76,13 @@ body {
     justify-content: center;
     align-items: center;
    
-;  }
-
+  }
+.menubar li {
+  color: gray;
+}
+.on {
+  color:black;
+}
   .view-image img {
     width: 80%;
     border-radius: 1rem;

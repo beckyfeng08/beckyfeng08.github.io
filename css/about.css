@@ -2,6 +2,12 @@
 ul {
   list-style: none;
 }
+.menubar li {
+  color: gray;
+}
+.on {
+  color:black;
+}
 a {
   color: rgb(120, 138, 121); /* Change the color to black */
   text-decoration: underline; /* Add underline */

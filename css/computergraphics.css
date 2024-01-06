@@ -13,6 +13,12 @@ p {
   color:gray;
 }
 
+.menubar li {
+  color: gray;
+}
+.on {
+  color:black;
+}
 
 body {
   font-family: 'Futura';
