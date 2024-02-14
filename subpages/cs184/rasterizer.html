@@ -1,0 +1,454 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<style>
+  body {
+    padding: 100px;
+    width: 1000px;
+    margin: auto;
+    text-align: center;
+    align-items: center;
+    text-align: center;
+    justify-content: center;
+    font-weight: 300;
+    font-family: 'Futura', 'Playfair Display';
+    color: #f4f4f4;
+    background-color: rgb(21, 21, 21);
+  }
+  h1, h2, h3, h4 {
+    font-family: 'Futura';
+  }
+  h2, h3, h4 {
+    color: rgb(227, 227, 227);
+  }
+ 
+  p {
+    font-family: 'Open Sans';
+    font-size: 20px;
+    color: rgb(209, 209, 209);
+  }
+  code {
+    background-color: rgb(73, 73, 73);
+  }
+  figcaption {
+    font-family: 'Open Sans';
+    color: rgb(209, 209, 209);
+  }
+ 
+ ol {
+  font-family: 'Open Sans';
+  color: rgb(209, 209, 209);
+ }
+
+ li {
+  text-align: left;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+ }
+th, td {
+  padding: 10px;
+}
+a {
+  color:white;
+}
+html {
+            scroll-behavior: smooth;
+        }
+
+</style>
+<title>CS 184/284A Rasterizer</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+</head>
+
+
+<body>
+  <div>
+    <div>
+      <h1 align="middle">CS 184/284A: Computer Graphics and Imaging, Spring 2024</h1>
+      <h1 align="middle">Homework 1: Rasterizer</h1>
+      <h2 align="middle">Rebecca Feng</h2>
+    </div>
+  </div>
+<br><br>
+
+<div>
+  <img src="examples/example2.jpeg" height="500px;">
+<h2 align="middle">Overview</h2>
+<p>Give a high-level overview of what you implemented in this homework Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.</p>
+<p>I implemented various sampling techniques for an SVG rasterizer, such as supersampling, bilinear interpolation, barycentric coordinates, and mipmapping.
+  At the end, I used the rasterizer to render some of my own artwork.
+
+  Throughout this project, I learned how to take mathematical techniques taught in class and apply them in my code, such as determining
+  whether or not a point was within a given triangle, transforming objects via matrices, and using barycentric coordinates to interpolate
+  colors.
+</p>
+
+<h2 >Table of Contents</h2>
+<p >
+  <ul>
+    <li><a href="#sec1">Section I: Rasterization</a>
+      <ul>
+        <a href="#part1">
+          <li>Part 1: Rasterizing single-color triangles</li>
+        </a>
+        <a href="#part2">
+          <li>Part 2: Antialiasing triangles</li>
+        </a>
+        <a href="#part3">
+          <li>Part 3: Transforms</li>
+        </a>
+      </ul>
+    </li>
+    
+    <li><a href="#sec2">Section II: Sampling</a>
+      <ul>
+        <a href="#part4">
+          <li>Part 4: Barycentric coordinates</li></a>
+        <a href="#part5">
+          <li>Part 5: "Pixel sampling" for texture mapping</li>
+        </a>
+        <a href="#part6">
+          <li>Part 6: "Level sampling" with mipmaps for texture mapping</li>
+        </a>
+        </ul>
+    </li>
+    <li><a href="#sec3">Section III: Art Competition</a>
+      <ul>
+        <li>
+          <a href="#part7">
+          Part 7: Draw something interesting!
+        </a>
+        </li>
+      </ul>
+    </li>
+    
+  </ul>
+  
+</p>
+<h2 id="sec1">Section I: Rasterization</h2>
+
+<h3 id="part1">Part 1: Rasterizing single-color triangles</h3>
+<p>In the <code>rasterize_triangle</code> function, I created a bounding box of a triangle
+  given the coordinates, and went through every pixel in the bounding box. Then,
+  I used a helper function, called <code>inside_t</code>, to determine whether or not the pixel was inside the 
+  triangle. If it was, I would assign the given color to that particular pixel.
+  If not, I would move on to the next pixel. </p>
+<p>
+  Below is a visual diagram of how I implemented the <code>inside_t</code> helper function. I formed three normal vectors
+  given the vertices of the triangle, then used the dot product to determine whether the vector pointing to the sample point was in the 
+  triangle or not. Three dot products were performed, one for each normal vector between two vertices of the triangle.
+  The pixel is <i>inside </i> the triangle if the dot product yields a positive value, or a negative value for all three dot products.
+</p>
+<figure>
+  <img src="images/task1/task1_1.jpg" align="middle" width="800px">
+  <figcaption>Visual digram of the <code>inside_t</code> helper function</figcaption>
+</figure>
+
+<p>Since I am implementing the <code>rasterize_triangle</code> function based upon iterating through every pixel within
+the bounding box of a given triangle, my implementation is no worse than one that checks each sample within the bounding box of the triangle.</p>
+
+<figure>
+  <img src="images/task1/task1_2.png" align="middle" width="800px">
+  <figcaption> Screenshot of basic/test4.svg with the default viewing parameters</figcaption>
+</figure>
+
+
+
+<h3 id="part2">Part 2: Antialiasing triangles</h3>
+<p>I modified my sampling algorithm to include two more for loops - one loop
+  for the column of the super samples, and another for the row. I used the 
+  <code>sample_buffer</code> data structure available to us to assign the 
+  color of the SVG at the particular super-sampled position. Since the sample_buffer
+  buffer has a size of width*height*sample_rate, the color sampled at the (i, j)th pixel
+  and the (l, k)th sample is given by <code>sample_buffer[sample_rate * (width*j+i) +
+    k*samplecount + l]</code>.
+</p>
+<p>In the <code>resolve_to_framebuffer()</code> function, I read a batch of colors from 
+  <code>sample_buffer</code> of size sample_rate. I used a helper function to average the
+  colors in that batch, and put the RGB values inside the <code>rgb_framebuffer_target</code>
+  data structure provided to us.</p>
+
+  <p>Supersampling is useful because it gives off an antialiasing effect. Otherwise,
+    we would see jaggies along the edges of our rendered image, making the final product
+    look awkward, and rough. Here is a side-by-side comparison of sampling once per pixel
+    versus sampling 16 times per pixel:
+  </p>
+
+<div align="middle">
+  <table style="width:100%;">
+    <tr>
+      <td>
+        <img src="images/task2/task2_1.png" align="middle" width="500px"/>
+        <figcaption align="middle">Jaggies on basic/test5.svg, sample size of 1</figcaption>
+      </td>
+      <td>
+        <img src="images/task2/task2_2.png" align="middle" width="500px"/>
+        <figcaption align="middle">Antialiasing on basic/test5.svg, sample size of 16</figcaption>
+      </td>
+    </tr>
+    
+  </table>
+</div>
+<p>In terms of modifications, I had to add two more for loops within my <code>rasterize_triangle</code>
+function to account for supersampling within each pixel, as described above. In <code>resolve_to_framebuffer</code>,
+I needed to write the RGB values for the averaged color within that pixel.</p>
+<p>I also modified <code>fill_pixel</code> to account for aliasing points as lines, similarly by sampling within
+a particular pixel. This helped to reduce the effect of fading when upsampling.
+Additionally, I modified <code>set_sample_rate</code> and <code>set_framebuffer_target</code>
+to account for the resizing of the <code>sample_buffer</code>.
+</p>
+<p>To antialias my triangle, I averaged the color of the pixel based upon the supersamples within it.
+  The process of averaging the colors was done in the helper function, <code>average_colors</code>. 
+  Since each pixel was sampled <code>sample_rate</code> times, I 
+  took out <code>sample_rate</code> number of colors out of the  <code>sample_buffer</code> 
+  and outputted a color that was the average of the RGB values in the batch. The average was calculated by 
+  taking the mean of the red, green, and blue channels for each sample in the batch.</p>
+
+  <p>In the figures below, we see that as we increase the sample size, we experience
+    less jaggies and more antialiasing. This is because taking more samples allows
+    us to get more information on what proportion of a particular color is within the
+    pixel so we can output the average color within it, and achieve a more, convincing
+    and antialiased look.
+  </p>
+  <div align="middle">
+    <table style="width:100%;">
+      <tr>
+        <td>
+          <img src="images/task2/task2_3.png" align="middle" width="500px"/>
+          <figcaption align="middle">Jaggies on basic/test4.svg, sample size of 1</figcaption>
+        </td>
+        <td>
+          <img src="images/task2/task2_4.png" align="middle" width="500px"/>
+          <figcaption align="middle">Antialiasing on basic/test4.svg, sample size of 4</figcaption>
+        </td>
+        
+      </tr>
+      <tr>
+        <td>
+
+          <img src="images/task2/task2_5.png" align="middle" width="500px"/>
+          <figcaption align="middle">Antialiasing on basic/test4.svg, sample size of 16</figcaption>
+        </td>
+      </tr>
+      
+    </table>
+  </div>
+
+  <h3 id="part3">Part 3: Transforms</h3>
+  <figure>
+    <img src="images/task3/task3_1.png"  width="800px">
+    <figcaption> Screenshot of transform/robot.svg with adjustments in shape transformations and colors</figcaption>
+  </figure>
+  <p>I duplicated the original robot file, and made various changes in the translation, rotation, and scaling, and color
+    of the robot's body. I even added a background by duplicating one of the shapes, and adjusting the translation and scaling
+    as necessary.
+    For example with the left arm, the following transformations were performed in this order:
+  </p>
+  <ol>
+    <li>
+      translate(250 250) (for the entire body)
+    </li>
+    <li>
+      translate(-70 -10) (for the arm itself)
+    </li>
+    <li>
+      rotate(-70)
+    </li>
+    <li>scale(.6 .2)</li>
+    <li>rotate(-100) (for the upper arm)</li>
+    <li>translate(-50 -30)</li>
+    <li>scale(.6 .2)</li>
+
+  </ol>
+  <p>I switched the color by changing the hexcode.</p>
+    
+ 
+
+<h2 id="sec2">Section II: Sampling</h2>
+
+<h3 id="part4">Part 4: Barycentric coordinates</h3>
+<p>Barycentric coordinates are a way to linearly interpolate between points on a surface.
+  An example can be shown below, where each vertex is associated with a color. In the middle of the triangle,
+  we have a blend of all three colors - more red if the sample point is closer to the red coordinate, or an 
+  equal blend of all three colors if the sample point is in the middle.
+
+</p>
+
+<figure>
+  <img src="images/task4/task4_2.png" align="middle" width="800px">
+  <figcaption> A linearly interpolated triangle, visualized by colors, and interpolated using barycentric coordinates  </figcaption>
+  
+</figure>
+<p>
+  I referenced this slide when calculating the RGB values at a particular sample point:
+</p>
+<figure>
+  <img src="images/task4/task4_3.png" align="middle" width="800px">
+  <figcaption> Formulae for calculating barycentric coordinates, where alpha, beta, and gamma
+    are the weights of each point, A, B, and C (or in our case, A, B, and C represent colors)  </figcaption>
+    <img src="images/task4/task4_1.png" align="middle" width="800px">
+  <figcaption> Color wheel using barycentric coordinates for linearly interpolating colors </figcaption>
+</figure>
+
+
+<h3 id="part5">Part 5: "Pixel sampling" for texture mapping</h3>
+<p>Pixel sampling is sampling a texture at every pixel. When a texture is applied
+  to a shape, we may want to warp the texture. Thus, we must figure out 
+  what pixels will be displayed with the warped texture in relation to the shape.
+  Two methods of pixel sampling are <b>nearest pixel sampling</b> and <b> bilinear
+   sampling</b>.
+</p>
+<p>Nearest pixel sampling is simply sampling the closest color value in the texture
+  with the calculated UV coordinates. However, this method is prone to aliasing.
+</p>
+<p>Bilinear sampling is sampling a color found by interpolating between the four closest
+  pixels in a texture map. As seen in the image below, the red dot represents a point being
+sampled, the black dots represent pixels in the original texture with a defined color.
+We linearly interpolate based upon these four black dots to obtain a blended hue for the red dot.
+The resulting image is a smoother, and less jagged picture. </p>
+<div align="middle">
+  <table style="width:100%;">
+    <tr>
+      <td>
+        <img src="images/task5/task5_1.png" align="middle" width="500px"/>
+        <figcaption align="middle">Nearest neighbor sampling on texmap/test2.svg, sample size of 1</figcaption>
+      </td>
+      <td>
+        <img src="images/task5/task5_2.png" align="middle" width="500px"/>
+        <figcaption align="middle">Bilinear sampling on texmap/test2.svg, sample size of 1</figcaption>
+      </td>
+      
+    </tr>
+    <tr>
+      <td>
+
+        <img src="images/task5/task5_3.png" align="middle" width="500px"/>
+        <figcaption align="middle">Nearest neighbor sampling on texmap/test2.svg, sample size of 16</figcaption>
+      </td>
+      <td>
+
+        <img src="images/task5/task5_4.png" align="middle" width="500px"/>
+        <figcaption align="middle">Bilinear sampling on texmap/test2.svg, sample size of 16</figcaption>
+      </td>
+    </tr>
+    
+  </table>
+</div>
+<p>For the sample size of 1, we see that applying bilinear sampling gives a 
+  slightly more smoother look-- although dark particles still appear here and there.
+  For the sample size of 16, we see that these harsh changes in color have been relatively
+  smoothed out, and even more so when we perform bilinear sampling.</p>
+  <p>We will tend to see a larger difference between bilinear and nearest pixel sampling
+    under lower samples. This is because the neighboring pixels for an image of sample size 1
+    will have a greater variety of color due to aliasing, so it will be more noticeable
+    when applying bilinear sampling.
+    Since the supersampled version has already contributed to most of the smoothing,
+    the neighboring pixels will be closer in color, and bilinear sampling won't improve the image quality as significantly.
+  </p>
+<h3 id="part6">Part 6: "Level sampling" with mipmaps for texture mapping</h3>
+<p>
+  The more warped or scaled a texture is compared to the original, the higher
+  mipmap level we want to use. Higher mipmap levels tend to be more blurred /
+  interpolated so that we can minimize aliasing. In my implementation, I calculated
+  the UV coordinates at pixels (x,y), (x+1, y), and (x, y+1) in our render. Then, 
+  I determined du/dx, dv/dx, du/dy, and dv/dy given that dx = 1, dy = 1,
+  and du and dv are the difference in their UV coordinate values at (x,y), (x+1, y) and 
+  (x,y), (x, y+1), and scaled it according to the width of the mipmap. I used the following formulae below to get the correct
+  mipmap level, D:
+</p>
+<img src="images/task6/task6_1.png" align="center" width="600px">
+<p>Below are the advantages and disadvantages for using various sampling techniques:</p>
+<table align="center" border="1">
+  <tr>
+    <th> </th>
+      <th> Pixel Sampling </th>
+      <th> Level Sampling </th>
+      <th>Increasing Number of Samples per Pixel</th>
+  </tr>
+  <tr>
+      <td>Advantages</td>
+      <td>Fast and efficient, doesn't take up too much space</td>
+      <td>Fast way to antialias something</td>
+      <td>Can yield a smooth, antialiased look
+      </td>
+  </tr>
+  <tr>
+      <td>Disadvantages</td>
+      <td>Prone to aliasing and jaggies</td>
+      <td>Takes up more memory than other methods (4/3 times), although
+        not by too much.
+      </td>
+      <td>Very slow, especially with higher samples. The sample_buffer can take up
+        lots of space.</td>
+  </tr>
+</table>
+<p> Below is an example of combining level sampling with pixel sampling at a sample size of 1:</p>
+<div align="middle">
+  <table style="width: 100%;">
+    <tr>
+      <img src="images/task6/IMG_4764.png" align="middle" height="500px"/>
+        <figcaption align="middle">Original image </figcaption>
+    </tr>
+    <tr>
+      <td>
+        <img src="images/task6/task6_2.png" align="middle" width="500px"/>
+        <figcaption align="middle">Mipmap level = 0, using nearest neighbor pixel sampling </figcaption>
+      </td>
+      <td>
+        <img src="images/task6/task6_3.png" align="middle" width="500px"/>
+        <figcaption align="middle">Mipmap level = 0, using bilinear interpolation pixel sampling</figcaption>
+      </td>
+      
+    </tr>
+    <tr>
+      <td>
+
+        <img src="images/task6/task6_4.png" align="middle" width="500px"/>
+        <figcaption align="middle">Using nearest mipmap level, and nearest neighbor pixel sampling</figcaption>
+      </td>
+      <td>
+
+        <img src="images/task6/task6_5.png" align="middle" width="500px"/>
+        <figcaption align="middle">Using nearest mipmap level, and bilinear interpolation pixel sampling</figcaption>
+      </td>
+    </tr>
+    
+  </table>
+</div>
+<h2 id="sec3">Section III: Art Competition</h2>
+
+<h3 id="part7">Part 7: Draw something interesting!</h3>
+<img src="images/task7/render.png" align ="center" width="600px">
+<p>I drew a Pikachu on a drawing app as a guide, and then using the rasterizer,
+  I painstakingly colored it in using polygons by modifying the code inside the SVG file. Then, I rendered
+  it with the rasterizer to make sure the polygons were placed correctly. The cheeks were rendered by
+  duplicating one of the eye shapes and performing translation, rotation, and scale transforms implemented in 
+  task 3. I also thought that the image would look better if I added some color jitter, so every few polygons, I modifed the hexcode by one digit. The
+  gradient triangle in the background was rendered via the custom Colortri class implemented
+  in this project in task 4.
+</p>
+<p>The purpose of the wine textures is to make this art piece more humorous (and perhaps, relatable to some).</p>
+<p> Progress pictures below:</p>
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="images/task7/task7_2.png" align="middle" height="500px"/>
+        <figcaption align="middle">Original drawing, to be traced over</figcaption>
+      </td>
+      <td>
+        <img src="images/task7/task7_1.png" align="middle" height="500px"/>
+        <figcaption align="middle">Work in progress, coloring the ears</figcaption>
+      </td>
+      
+    </tr>
+    
+    
+  </table>
+</div>
+</div>
+
+</body>
+</html>
