@@ -76,7 +76,6 @@ html {
 <div>
   <img src="examples/example2.jpeg" height="500px;">
 <h2 align="middle">Overview</h2>
-<p>Give a high-level overview of what you implemented in this homework Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.</p>
 <p>I implemented various sampling techniques for an SVG rasterizer, such as supersampling, bilinear interpolation, barycentric coordinates, and mipmapping.
   At the end, I used the rasterizer to render some of my own artwork.
 
@@ -154,6 +153,27 @@ the bounding box of a given triangle, my implementation is no worse than one tha
   <figcaption> Screenshot of basic/test4.svg with the default viewing parameters</figcaption>
 </figure>
 
+<p><b>Extra credit:</b> I optimized my code so that it would only iterate through the left side of the triangle. I made a new variable
+  called <code>prev_inside</code>, which equals 1 if the previous pixel was inside the triangle, and 0 if it wasn't. We
+  move onto the next row of pixels if <code>prev_inside == 1 and inside == 0</code>, because we know that the pixels in the 
+  rest of the row isn't in the triangle.
+</p>
+<p>I timed how long it took to render the lion SVG sixteen times for both the unoptimized and optimized version. The mean value for the optimized implementation 
+  was 0.260 seconds, whereas the mean for the unoptimized was 0.289 seconds. Performing a 2-sample t-test with a 0.05 significance level, using the <code>scipy.stats</code> library, 
+  we saw a significant difference between the two means.
+  </p>
+  <p>
+  Below is a depiction of what the optimized version looks like for a single triangle compared to the unoptimized one:
+</p>
+
+<figure>
+<img src="images/task1/task1_ec.jpg" height="300px" >
+<figcaption>Optimized vs unoptmized method of rendering a triangle. The green represents the indices we are iterating
+  through. In the unoptimized implementation, we are iterating throught the bounding
+  box of the triangle. In the optimized implementation, we move onto the next row of pixels
+  after hitting the rightmost edge of the triangle.
+</figcaption>
+</figure>
 
 
 <h3 id="part2">Part 2: Antialiasing triangles</h3>
@@ -225,17 +245,38 @@ to account for the resizing of the <code>sample_buffer</code>.
         </td>
         
       </tr>
-      <tr>
-        <td>
-
+      
           <img src="images/task2/task2_5.png" align="middle" width="500px"/>
           <figcaption align="middle">Antialiasing on basic/test4.svg, sample size of 16</figcaption>
-        </td>
-      </tr>
+       
       
     </table>
   </div>
 
+  <p><b>Extra credit:</b> I implemented jittered sampling as an alternative solution to
+  aliasing. Although it is faster than supersampling, the antialiasing is not nearly as good.
+However, it does introduce more randomness than sampling, which can be good for antialiasing on more detailed
+objects. </p>
+<div align="middle">
+  <table style="width:100%;">
+    <tr>
+      <td>
+        <img src="images/task2/sample0.jpeg" align="middle" width="300px"/>
+        <figcaption align="middle">Sample size of 1, no jitter sampling</figcaption>
+      </td>
+      <td>
+        <img src="images/task2/supersample9.jpeg" align="middle" width="300px"/>
+        <figcaption align="middle">Super sample size of 9, no jitter sampling</figcaption>
+      </td>
+      <td>
+        <img src="images/task2/jittersampling.jpeg" align="middle" width="300px"/>
+        <figcaption align="middle">Sample size of 1, with jitter sampling</figcaption>
+      </td>
+    </tr>
+    
+    
+  </table>
+</div>
   <h3 id="part3">Part 3: Transforms</h3>
   <figure>
     <img src="images/task3/task3_1.png"  width="800px">
@@ -263,7 +304,14 @@ to account for the resizing of the <code>sample_buffer</code>.
 
   </ol>
   <p>I switched the color by changing the hexcode.</p>
-    
+  <p><b>Extra credit:</b> I made a color picker that can be toggled in the rasterizer
+  by pressing the 'W' key. The color picker zooms in where the mouse is hovered over,
+and displays the RGB value of that pixel. I took the code for the zoom-in tool, resized it, and 
+change the number of pixels to display to 1. Then, I got the RGB values by using
+OpenGL's <a href="https://registry.khronos.org/OpenGL-Refpages/gl4/html/glReadPixels.xhtml">glReadPixels feature.</a></p>
+<img src="images/task3/colorpicker1.jpeg" align="middle" height="500px"/>
+<img src="images/task3/colorpicker2.jpeg" align="middle" height="500px"/>
+
  
 
 <h2 id="sec2">Section II: Sampling</h2>
