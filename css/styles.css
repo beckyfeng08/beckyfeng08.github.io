@@ -94,6 +94,12 @@ body {
 .image-container #pic5:hover {
   transform:rotate(-2deg);
 }
+.image-container #pic6 {
+  transform:rotate(-3deg);
+}
+.image-container #pic6:hover {
+  transform:rotate(-1deg);
+}
 #profilepic {
     width: 400px;
     filter:drop-shadow(-5px 5px 5px rgb(189, 189, 189));
@@ -149,7 +155,17 @@ body {
     margin-left: 20px;
   }
 
- 
+ .quicklinks {
+  margin-top: 50px;
+ }
+ button {
+  background-color: rgb(226, 196, 155);
+  margin: 10px;
+  border: none;
+}
+button:hover {
+  background-color:burlywood;
+}
 
   #actualpic {
     margin: 20px;
