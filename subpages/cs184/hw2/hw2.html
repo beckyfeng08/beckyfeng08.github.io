@@ -1,0 +1,710 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <style>
+    body {
+      padding: 100px;
+      width: 1000px;
+      margin: auto;
+      text-align: center;
+      align-items: center;
+      text-align: center;
+      justify-content: center;
+      font-weight: 300;
+      font-family: 'Futura', 'Playfair Display';
+      color: #f4f4f4;
+      background-color: rgb(21, 21, 21);
+    }
+    h1, h2, h3, h4 {
+      font-family: 'Futura';
+    }
+    h2, h3, h4 {
+      color: rgb(227, 227, 227);
+    }
+    img {
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+   
+    p {
+      font-family: 'Open Sans';
+      font-size: 20px;
+      color: rgb(209, 209, 209);
+    }
+    code {
+      background-color: rgb(73, 73, 73);
+    }
+    figcaption {
+      font-family: 'Open Sans';
+      color: rgb(209, 209, 209);
+      font-size: 15px;
+    }
+   
+   ol {
+    font-family: 'Open Sans';
+    color: rgb(209, 209, 209);
+   }
+  
+   li {
+    text-align: left;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+   }
+  th, td {
+    padding: 10px;
+  }
+  a {
+    color:white;
+  }
+  html {
+              scroll-behavior: smooth;
+          }
+  
+  </style>
+<title>CS 184 Mesh Edit</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+
+<script>
+  MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']]
+    }
+  };
+</script>
+<script id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+
+</head>
+
+
+<body>
+
+<h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2023</h1>
+<h1 align="middle">Project 2: Mesh Edit</h1>
+<h2 align="middle">Rebecca Feng and Mahum Khan</h2>
+
+<img src="images/task4/task4_tea1.png"><img>
+<h3>Link to this page: </h3>
+<br><br>
+
+<div>
+
+<h2 align="middle">Overview</h2>
+<p>
+    This project encompasses various techniques of mesh navigation, focusing on implementing algorithms related to the half-edge data structure. 
+    We begin by understanding the Bezier curves and its implementation using the 1D de Casteljau subdivision algorithm. We then were able to extend that understanding to Bezier surfaces. <br>
+    In the next section, we got to utilize half-edge data structures to create edge flips/splits to the triangle meshes, which aided us in implementing Loop subdivision. <br>
+    Lastly, we were able to use the engine to create a custom toon-shader using the OpenGL library.
+</p>
+<br>
+
+
+<h2 align="middle">Section I: Bezier Curves and Surfaces</h2>
+
+<h3 align="middle">Part 1: Bezier Curves with 1D de Casteljau Subdivision</h3>
+
+<b>
+  Briefly explain de Casteljau's algorithm and how you implemented it in order to evaluate Bezier curves.
+</b>
+<p>
+   De Casteljau's algorithm is an algorithm that forms Bezier curves from several points in 
+   some coordinate space (for this project, we work in 2D and 3D Euclidian space). At its base 
+   level, given two points in some coordinate space, and a parameter t (where 0 <= t <= 1) as 
+   input, we can linearly interpolate the two points to find a middle point that lies on the 
+   final Bezier curve. When given a list of several points, let's say 5, we take two points at a time
+   in order, interpolate with parameter t, and end up with a list of 4 points. We interpolating with
+   the same parameter t until we end up with a list of just 1 point, which is the point on our Bezier
+   curve. 
+
+   Below is the recursive formula to find the interpolated point given two points and a parameter t:
+
+</p>
+
+<div class="mathjax">
+  \( p_{\text{new}} = (1-t)*p_0 + t*p_1 \)
+</div>
+<p></p>
+<img src="images/task1/task1_1.jpg" width="500px">
+<figcaption>Visual representation of De Casteljau's Algorithm with four points </figcaption>
+<br>
+<p>
+  In order to evaluate Bezier curves, we created a for loop that cycled through the entire std::vector
+  of Vector2D coordinates, and interpolated the ith and i+1th point in the list using the recursive formula 
+  given above, then returned a std::vector of interpolated coordinate points from one recursive step of
+  running De Casteljau's.
+</p>
+
+
+<b>
+  Take a look at the provided .bzc files and create your own Bezier curve with 6 control points of your choosing. Use this Bezier curve for your screenshots below.
+</b>
+<p>
+    Below is an example bezier curve we created and displayed on the renderer:
+</p>
+<!-- Example of including a single figure -->
+<div align="middle">
+  <img src="images/task1/task1_9.jpeg" align="middle" width="50%">
+</div>
+<br>
+
+<b>
+  Show screenshots of each step / level of the evaluation from the original control points down to the final evaluated point. Press <kbd>E</kbd> to step through. Toggle <kbd>C</kbd> to show the completed Bezier curve as well.
+</b>
+<!-- Example of including multiple figures -->
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/task1/task1_2.jpeg" align="middle" width="400px"/>
+        <figcaption>Level 0</figcaption>
+      </td>
+      <td>
+        <img src="images/task1/task1_3.jpeg" align="middle" width="400px"/>
+        <figcaption>Level 1</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr align="center">
+      <td>
+        <img src="images/task1/task1_3.jpeg" align="middle" width="400px"/>
+        <figcaption>Level 2</figcaption>
+      </td>
+      <td>
+        <img src="images/task1/task1_4.jpeg" align="middle" width="400px"/>
+        <figcaption>Level 3</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr align="center">
+      <td>
+        <img src="images/task1/task1_5.jpeg" align="middle" width="400px"/>
+        <figcaption>Level 4</figcaption>
+      </td>
+      <td>
+        <img src="images/task1/task1_6.jpeg" align="middle" width="400px"/>
+        <figcaption>Level 5</figcaption>
+      </td>
+    </tr>
+    <tr align="center">
+      <td>
+        <img src="images/task1/task1_7.jpeg" align="middle" width="400px"/>
+        <figcaption>Level 6</figcaption>
+      </td>
+      <td>
+        <img src="images/task1/task1_8.jpeg" align="middle" width="400px"/>
+        <figcaption>Bezier curve</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+
+
+<b>
+  Show a screenshot of a slightly different Bezier curve by moving the original control points around and modifying the parameter \(t\) via mouse scrolling.
+</b>
+
+<p>
+  <img src="images/task1/task1_10.jpeg" width="500px">
+  <figcaption>Different Bezier curve with a modified parameter t</figcaption>
+</p>  
+
+<br>
+
+
+<h3 align="middle">Part 2: Bezier Surfaces with Separable 1D de Casteljau</h3>
+<b>
+  Briefly explain how de Casteljau algorithm extends to Bezier surfaces and how you implemented it in order to evaluate Bezier surfaces.
+</b>
+<p>
+    To understand how de Casteljau's works on Bezier surfaces, it would help to do a quick recap and understand how the algorithm works on Bezier curves. 
+    Again, the curve has a parameter <b> u </b> that varies between 0 and 1 and the algorithm calculates intermediate points by linearly interpolating 
+    between pairs of adjacent control points. To extend this to a Bezier surface, there needs to be a consideration of another parameter - let's call <b>v</b> 
+    - that also varies between 0 and 1. Together, <b>u</b> and <b>v</b> can be used to define that position of the point on the surface. 
+    </p>
+    <p>The implementation would then require everything to be increased by a dimension. So, the first step is to modify <code>evaluateStep</code>  to have it return vectors to be a
+      3D vector instead of the 2D vectors from the previous implementation. Then, evaluate all the interpolated vectors for the points in the <b>u</b> direction. This 
+      is done in <code>evaluate1D</code> by iterating over each row of control points and applying <code>evaluateStep</code> to obtain interpolated points along that row using the parameter <b>u</b>. 
+       For each interpolated vector obtained in the <b>u</b> direction, we then need to find the interpolated vector in the <b>v</b> direction. This involves applying <code>evaluate1D</code> 
+       again to each vector obtained in the <b>u</b> direction, this time using the parameter <b>v</b>in <code>evaluate</code>. 
+
+    </p>
+<br>
+
+
+<b>
+  Show a screenshot of bez/teapot.bez (not .dae) evaluated by your implementation.
+</b>
+<p>
+  <img src="images/task2/task2_tea.png" width="500px">
+  <figcaption>bez/teapot.bez evaluated by de Casteljau algorithm extended to Bezier surfaces.</figcaption>
+</p>
+<br>
+
+
+<h2 align="middle">Section II: Triangle Meshes and Half-Edge Data Structure</h2>
+
+<h3 align="middle">Part 3: Area-Weighted Vertex Normals</h3>
+
+<b>
+  Briefly explain how you implemented the area-weighted vertex normals.
+</b>
+<p>
+    
+To implement area-weighted vertex normals, calculate the area of a triangle based on three vectors with the following formula:
+</p>
+<div class="mathjax">
+  \( A = \frac{1}{2} |\mathbf{a} \times \mathbf{b}| \)
+</div>
+<p>
+where <b>a</b> and <b>b</b> are two vectors that make up the triangle. We then take the magnitude of its cross product, halved. Do this for each halfedge and iterate over all triangles that share that halfedge. For each triangle, add the face normal of that triangle weighted by the area of the triangle to the sum of normals for that halfedge. Iterate to the twin of the halfedge and continue the process until there are no more halfedges. After summing the weighted normals for each halfedge, normalize the resulting vector to get the final normalized vector. 
+</p>
+<br>
+
+
+<b>
+  Show screenshots of dae/teapot.dae (not .bez) comparing teapot shading with and without vertex normals. Use <kbd>Q</kbd> to toggle default flat shading and Phong shading.
+</b>
+<p>
+  <img src="images/task3/task3_before.png" width="500px">
+  <figcaption>dae/teapot.dae shading without vertex normals</figcaption>
+</p>
+<p>
+  <img src="images/task3/task3_after.png" width="500px">
+  <figcaption>dae/teapot.dae shading with vertex normals</figcaption>
+</p>
+<br>
+
+
+<h3 align="middle">Part 4: Edge Flip</h3>
+<b>
+  Briefly explain how you implemented the edge flip operation and describe any interesting implementation / debugging tricks you have used.
+</b>
+<p>
+    The edge flip operations requires a clear visual understanding of every inner halfedge, outer halfedge, edge, and vertex. As shown in the 
+    diagram from the <a href="http://15462.courses.cs.cmu.edu/fall2015content/misc/HalfedgeEdgeOpImplementationGuide.pdf">
+      "Guide to Implementing Edge Operations on a Halfedge Data Structure"</a>, there are 9 halfedges, 4 vertices, 4 edges, and 2 faces. 
+      It is important to note the changes that were made before the flip vs after the flip. 
+</p>
+
+<p>
+  <img src="images/task4/task4_beforeflip.png" width="500px">
+  <figcaption>A diagram from<a href="http://15462.courses.cs.cmu.edu/fall2015content/misc/HalfedgeEdgeOpImplementationGuide.pdf">
+    "Guide to Implementing Edge Operations on a Halfedge Data Structure"</a>  
+    to show what the local neighborhood should look like before flipping.  </figcaption>
+</p>
+<p>
+  <img src="images/task4/task4_afterflip.png" width="500px">
+  <figcaption>A diagram from <a href="http://15462.courses.cs.cmu.edu/fall2015content/misc/HalfedgeEdgeOpImplementationGuide.pdf">
+    "Guide to Implementing Edge Operations on a Halfedge Data Structure"</a>  
+     to show what the local neighborhood should look like after flipping.  </figcaption>
+</p>
+
+<p>
+    In the next part of the implementation, we reassigned each aspect in the diagram - 
+    even if it is otherwise unchanged, for organization's sake. To condense the code for the halfedges,
+     it is easier to use the given <code>setNeighbors(...)</code> method, which can set a half-edge's next half-edge, 
+     twin half-edge, vertex, edge, and face all at once. Then, with one line of code, we can 
+    properly reassign all the relevant variables for each halfedge. We proceed with reassigning the appropriate 
+    halfedge to vertices, edges, and faces. It is important to carefully follow the diagram in this step as there 
+    are many places that an incorrect assignment can be made and can cause unexpected behavior in the image. 
+</p>
+
+<br>
+
+
+<b>
+  Show screenshots of the teapot before and after some edge flips.
+</b>
+<p>
+  <img src="images/task4/task4_tea1.png" width="500px">
+  <figcaption>dae/teapot.dae before edge flips</figcaption>
+</p>
+<p>
+  <img src="images/task4/task4_tea2.png" width="500px">
+  <figcaption>dae/teapot.dae after edge flips</figcaption>
+</p>
+<br>
+
+
+<b>
+    Write about your eventful debugging journey, if you have experienced one.
+</b>
+<p>
+  We used the given <code>check_for(*args)</code> method to make sure that our mesh elements existed.
+    However, all of our bugs stemmed from mis-assigning vertices and edges, which just required
+    us to revisit the diagram, and ensuring that everything was labeled correctly and was being reassigned appropriately.
+</p>
+<br>
+
+
+<h3 align="middle">Part 5: Edge Split</h3>
+<b>
+  Briefly explain how you implemented the edge split operation and describe any interesting implementation / debugging tricks you have used.
+</b>
+<p>
+    Edge split required a similar approach to edge flip with the addition of having to add 1 vertex, 6 halfedges, and 3 edges. 
+</p>
+
+<p>
+  <img src="images/task4/task4_beforeflip.png" width="500px">
+  <figcaption>A diagram from "Guide to Implementing Edge Operations on a Halfedge Data Structure" to show what the local neighborhood should look like before splitting an edge </figcaption>
+</p>
+<p>
+  <img src="images/task5/task5_afterflip.jpg" width="500px">
+  <figcaption>A diagram we made to show what the local neighborhood should look like after splitting an edge </figcaption>
+</p>
+
+<p>
+  When creating new elements, we used <code>newVertex()</code>, <code>newHalfedge()</code>, <code>newEdge()</code>, and <code>newFace()</code>
+  to create the new variables. Then, in the reassignment section of the code, <code>setNeighbors(*args)</code>
+  can be used again for half-edges. Each element needs to be assigned to the correct element based on the
+   diagram of the after-splitting above. For defining the new vertex, its position was defined 
+   to be the midpoint of vertex 0 and vertex 1. 
+</p>
+
+<br>
+
+<b>
+    Show screenshots of a mesh before and after some edge splits. 
+</b>
+<p>
+  <img src="images/task4/task4_tea1.png" width="500px">
+  <figcaption>dae/teapot.dae before edge splits</figcaption>
+</p>
+<p>
+  <img src="images/task5/task5_tea2.png" width="500px">
+  <figcaption>dae/teapot.dae after edge splits</figcaption>
+</p>
+<br>
+
+
+<b>
+    Show screenshots of a mesh before and after a combination of both edge splits and edge flips.
+</b>
+<p>
+  <img src="images/task5/task5_combo.png" width="500px">
+  <figcaption>dae/teapot.dae after a combination edge flips & splits</figcaption>
+</p>
+<br>
+
+
+<b>
+    Write about your eventful debugging journey, if you have experienced one.
+</b>
+<p>
+    For this task, the debugging came in when having to deal with uninitialized elements 
+    which led to potential segfaults. To mediate this, we defined a new halfedge to any 
+    other halfedge and reassigned it later on in the code. This mediated such issues.
+    Other than that, we followed the same strategy from task 4 and carefully drew and 
+    followed the diagram to make sure the pointers were all correctly defined.
+</p>
+<br>
+
+
+<!-- <b>
+    If you have implemented support for boundary edges, show screenshots of your implementation properly handling split operations on boundary edges.
+</b>
+<p>
+    YOUR RESPONSE GOES HERE
+</p>
+<br> -->
+
+
+<h3 align="middle">Part 6: Loop Subdivision for Mesh Upsampling</h3>
+<b>
+  Briefly explain how you implemented the loop subdivision and describe any interesting implementation / debugging tricks you have used.
+</b>
+  <p>
+    We implemented Loop subdivision via the following steps:
+    <ol>
+      <li>
+        Iterate through all vertices in the mesh, and set their <code>isNew</code> attribute to false.
+        We compute the updated position for these vertices after subdividing by using the following formula:
+        <br>
+        <br>
+        <div class="mathjax">
+          \( updated position = (1 - n * u) * (original position) + u * (original neighbor position sum) \)
+          <br>
+          where
+          <ul>
+            <li>n is the vertex degree</li>
+            <li> u = \( \frac{3}{16}\) if n = 3, \(\frac{3}{8n} \) otherwise</li>
+            <li>\(original position\) is the position of the vertex before subdivision</li>
+            <li>\(original neighbor position sum\) is the sum of all original positions of the neighboring vertices.
+            </li>
+
+          </ul>
+          and as labeled in the followign diagram for visualization:
+          <div align="middle">
+
+          <img src="images/task6/task6_2.png" align="middle" style="margin:3%" width="300px;">
+          </div>
+          
+        </div>
+         Then, we store the calculated position in <code>vertex->newPosition</code>.
+      </li>
+      <br>
+      <li>
+        Second, we computed new vertex positions associated with vertices created during subdivision. Since
+        we have not subdivided yet (thus, these new vertices don't yet exist), we store these new positions in
+        the edge which the new vertex will split. The new position is calculated as follows:
+        <div class="mathjax">
+          \( 3/8 * (A + B) + 1/8 * (C + D) \)
+          <br>
+          <br>
+          where the vertex positions A, B, C, and D are the same as the following diagram:
+         
+          <div align="middle">
+            <img src="images/task6/task6_1.png" height="300px" style="margin:3%;">
+          </div>
+         
+          
+          
+        </div>
+        We set each edge's <code>isNew</code> attribute to false.
+      </li>
+      <br>
+      <li>
+        After computing the old vertex and new vertex's new positions, we split every old edge and update the mesh accordingly. 
+        This involves adding a new vertex at the midpoint of the edge and updating adjacent elements such as faces and edges.
+        In the process of splitting, we also assigned the <code>isNew=true</code> to two new edges and the new vertex, and 
+        the divided edge to false.
+        <br>
+        <br>
+        <div align="middle">
+          <img src="images/task4/task4_beforeflip.png" width="500px">
+          <figcaption> Before splitting the edge - all mesh elements's <code>isNew = false</code></figcaption>
+        <br>
+          <img src="images/task5/task5_afterflip.jpg" width="500px">
+          <figcaption>After splitting - v4, e7, and e5 are labeled <code>isNew=true</code> in this diagram. We assign the newly-created e6's <code>isNew=false</code>,
+            because it is simply a result of splitting e0 in the diagram before the split. </figcaption>
+          </div>
+
+          We can check whether an edge is old or not by making sure that the edge's isNew=false, and both its vertices' isNew =false.
+      </li>
+      <br>
+      <li>
+        We flipped new edges that had a new vertex on one end, and an old vertex on the other. 
+      </li>
+      <br>
+      <li>
+        Lastly, we update the positions of each vertex to their new positions, which is stored in the vertex itself
+        if the vertex is from the previous mesh (vertex->newPosition), or in the edge if the vertex is created by the subdivision (edge->newPosition).
+      </li>
+      <br>
+    </ol>
+    
+    <br> 
+
+    <p>
+    In terms of debugging, we used cout statements that printed values in the terminal as the code was running
+    to determine where the error was when we ran into an infinite loop caused by infinite edge subdivision. We also has to pay attention to boundary conditions and special cases, 
+    such as handling boundary edges separately to avoid segfaults and other errors.
+    We also had to fix our implementation of flipping edges when our subdivision appeared bumpy, double
+    checked our conditions for splitting and updating edges, and also found an error with our calculation
+    for updated vertex positions. We found that for loops were more effective for iterating
+    between edges and vertices than while loops were.
+  </p>
+  </p>
+
+<b>
+  Take some notes, as well as some screenshots, of your observations on how meshes behave after loop subdivision. What happens to sharp corners and edges? Can you reduce this effect by pre-splitting some edges?
+</b>
+<p>
+    After loop subdivision, meshes undergo changes that consist of smoothing sharp features, an increase in the density of the mesh, and lead to topology changes which can affect its connectivity. <br>
+    Pre-splitting some edges before applying loop subdivision can help with the smoothing effect on sharp corners and edges. By strategically splitting certain edges into smaller segments, you can control the distribution of vertices and create smooth features more effectively.
+</p>
+<br>
+
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/task6/cube_before.png" align="middle" width="400px"/>
+        <figcaption>dae/cube.dae before any upsamples</figcaption>
+      </td>
+      <td>
+        <img src="images/task6/cube_after.png" align="middle" width="400px"/>
+        <figcaption>dae/cube.dae after many upsamples</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr align="center">
+      <td>
+        <img src="images/task6/cube_before1.png" align="middle" width="400px"/>
+        <figcaption>dae/cube.dae before any loop subdivision and with pre-splitting on an edge</figcaption>
+      </td>
+      <td>
+        <img src="images/task6/cube_after1.png" align="middle" width="400px"/>
+        <figcaption>dae/cube.dae after an upsample displays the corner is smooth than others/figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+
+
+
+
+
+<b>
+  Load dae/cube.dae. Perform several iterations of loop subdivision on the cube. Notice that the cube becomes slightly asymmetric after repeated subdivisions. Can you pre-process the cube with edge flips and splits so that the cube subdivides symmetrically? Document these effects and explain why they occur. Also explain how your pre-processing helps alleviate the effects.
+</b>
+<p>
+    Asymmetry occurs due to the initial irregular connectivity of the cube's edges and vertices. During subdivision, irregularities propagate, leading to uneven distribution of vertices and faces. This results in the loss of symmetry over iterations, as different parts of the cube undergo different levels of subdivision. <br>
+    Pre-processing the cube with edge flips and splits ensures that the initial mesh has a more symmetric and regular topology. By flipping and splitting edges strategically, we can correct any irregularities and ensure that the cube subdivides symmetrically over iterations.
+</p>
+<br>
+
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/task6/cube_even.png" align="middle" width="400px"/>
+        <figcaption>dae/cube.dae pre-processed symmetrically before any upsamples</figcaption>
+      </td>
+      <td>
+        <img src="images/task6/cube_even_after.png" align="middle" width="400px"/>
+        <figcaption>dae/cube.dae pre-processed symmetrically after many upsamples</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+
+
+
+
+<!--<b>
+    If you have implemented any extra credit extensions, explain what you did and document how they work with screenshots.
+</b>
+<p>
+    YOUR RESPONSE GOES HERE
+</p>
+<br> -->
+
+
+<h3 align="middle">Part 7 (Optional, Possible Extra Credit)</h3>
+<b>
+    Save your best polygon mesh as partsevenmodel.dae in your docs folder and show us a screenshot of the mesh in your write-up.
+</b>
+
+<p>
+  <img src="images/task7/task7_7.mov" width="700px">
+  
+  <div align="middle">
+    <table style="width:100%">
+      <tr align="center">
+        <td>
+          <img src="images/task7/task7_1.png" align="middle" width="500px"/>
+          <figcaption>Catfish Fakémon, frontside</figcaption>
+        </td>
+        <td>
+          <img src="images/task7/task7_2.png" align="middle" width="500px"/>
+          <figcaption>Catfish Fakémon, backside</figcaption>
+        </td>
+      </tr>
+    </table>
+  </div>
+</p>
+
+<br>
+
+
+<b>
+    Include a series of screenshots showing your original mesh and your mesh after one and two rounds of subdivision. If you have used custom shaders, include screenshots of your mesh with those shaders applied as well.
+</b>
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/task7/task7_3.png" align="middle" height="320px"/>
+        <figcaption>First subdivision level</figcaption>
+      </td>
+      <td>
+        <img src="images/task7/task7_4.png" align="middle" height="320px"/>
+        <figcaption>Second subdivision level</figcaption>
+      </td>
+    </tr>
+    <tr align="center">
+      
+      <td>
+        <img src="images/task7/task7_6.png" align="middle" height="350px"/>
+        <figcaption>Custom toon-shader</figcaption>
+      </td>
+      <td>
+        <img src="images/task7/task7_5.png" align="middle" height="350px"/>
+        <figcaption>Custom toon-shader</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+
+<p>
+  
+</p>
+
+<b>
+    Describe what you have done to enhance your mesh beyond the simple humanoid mesh described in the tutorial.
+</b>
+<p>
+    The catfish was box-modeled in Autodesk Maya from a Pokémon idea that Rebecca had,
+    then brought into the Viewer. Additionally, we wanted to implement a custom toon-shader
+    for the project, so we edited some code in the shader/frag file, following the given
+    Phong shader as a reference.
+</p>
+<p>The shader is implemented as follows: we calculate the RGB value outputted by the main Phong shader.
+  Upon getting the RGB values, we determine its brightness by using the below equation copied from this
+   <a href="https://computergraphics.stackexchange.com/questions/5085/light-intensity-of-an-rgb-value#:~:text=You%20can%20calculate%20subjective%20brightness,)%20%2B%20(0.07%20×%20B)&text=So%2C%20for%20instance%2C%20that%20makes,as%20red%20(%20%23ff0000%20)." >
+    StackExchange forum
+  </a>:
+</p>
+<div class="mathjax">
+  \( (0.21 * red) + (0.72 * green) + (0.07 * blue) \)
+</div>
+<p>
+  Upon receiving the brightness, we check to see if the brightness is above 0.12.
+  If it is, we shade it with a peach color. If it isn't, we shade it blue. Why 0.12?
+  It just gave us the best-looking result for this model. 
+</p>
+<p>The slight difference in hues within the peach and blue come from converting the
+   <b>vec3</b> type vertex position to a <b>vec3</b> type RGB value, and adding the resulting
+  color times 0.05 to the flat peach or blue color. The number 0.05 was chosen to yield a small 
+  difference in color, so that the peach and blue is still the main color. </p>
+
+  <p>Additionally, we decided to change the background color, and make it change
+    over time. This is done by keeping track of a <b>time</b> variable, and 
+    using the glClearColor method (
+    glClearColor(1-0.3*sin(time + PI/2), 1-0.3*sin(time + PI), 1-0.3*sin(time), 1);
+    ). As we can see, the RGB values change sinusoidally, and 
+    time is increased by 0.01 every frame.
+  </p>
+<br>
+ <!-- used ChatGPT to generate code for including LaTex in HTML-->
+<script type="text/x-mathjax-config">
+ 
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          processEscapes: true
+      },
+      CommonHTML: {
+          linebreaks: { automatic: true }
+      },
+      "HTML-CSS": { linebreaks: { automatic: true } },
+      SVG: { linebreaks: { automatic: true } }
+  });
+</script>
+
+</body>
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+</html>
