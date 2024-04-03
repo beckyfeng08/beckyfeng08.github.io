@@ -1,0 +1,745 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <style>
+        body {
+            padding: 100px;
+            width: 1000px;
+            margin: auto;
+            text-align: center;
+            align-items: center;
+            text-align: center;
+            justify-content: center;
+            font-weight: 300;
+            font-family: 'Futura', 'Playfair Display';
+            color: #f4f4f4;
+            background-color: rgb(21, 21, 21);
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Futura';
+        }
+
+        h2, h3, h4 {
+            color: rgb(227, 227, 227);
+        }
+
+        p {
+            font-family: 'Open Sans';
+            font-size: 20px;
+            color: rgb(209, 209, 209);
+        }
+
+        code {
+            background-color: rgb(73, 73, 73);
+        }
+
+        figcaption {
+            font-family: 'Open Sans';
+            color: rgb(209, 209, 209);
+        }
+
+        ol {
+            font-family: 'Open Sans';
+            color: rgb(209, 209, 209);
+        }
+
+        li {
+            text-align: left;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+        }
+
+        a {
+            color: white;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+        .image-container {
+            display: flex;
+        }
+
+        .image-container img {
+            width: 120%; /* Each image takes up 33.33% of the container width */
+            height: auto; /* Maintain aspect ratio */
+        }
+        .image-container h3 {
+            clear: both; /* Ensures that the h3 starts on its own line */
+        }
+    </style>
+
+    <title>CS 184 Mesh Editor</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet" />
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async=async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+    </script>
+</head>
+
+
+<body>
+
+    <h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2024</h1>
+    <h1 align="middle">Project 4: Cloth Simulator</h1>
+    <h2 align="middle">Rebecca Feng &Aacute; Mahum Khan</h2>
+
+    <br /><br />
+
+    <div>
+
+        <h2 align="middle">Overview</h2>
+        <p>
+            We implemented a cloth simulator using the mass-spring method of representing a cloth. Additionally,
+            we implemented common GLSL shaders to render the cloth in the viewport. This project supports
+            the following features:
+       
+            <li>
+                <a href="#part1">Part 1: Masses and Springs</a>
+                <p>
+                    In this section, we created a grid of point masses that will represent our cloth. 
+                    To connect the point masses together, we implemented springs between the point masses
+                    that will then be used to simulate internal forces within the cloth.  
+                </p>
+            </li>
+            <li><a href="#part2">Part 2: Simulation via Numerical Integration</a>
+                <p>
+                    We applied external and internal forces in order to physically simulate our cloth. To do this, we calculated
+                    the total force on each point mass and then updated its position. Also, to ensure the cloth 
+                    stays intact, we took inspiration off of a paper and implemented constraints ensuring that the distance between
+                    two point masses did not exceed 110% of the rest length at any given time. 
+
+                </p>
+            </li>
+            <li><a href="#part3">Part 3: Handling Collisions with Other Objects</a>
+                <p>
+                    We handled collisions between the cloth and other primitives. Here, we determined 
+                    whether the cloth fell inside an object and revised each point mass's new position to be outside of the object. 
+                </p>
+            </li>
+            <li><a href="#part4">Part 4: Handling Self-Collisions</a>
+                <p>
+                    While the cloth can interact with other objects, it also needs to be able to recognize itself as a collider
+                    to prevent clipping. In order to handle self-collision, we built a hash-map that maps each point mass's position
+                    to a unique box in 3D space, and correct a particular point mass's position based upon the positions
+                    of other point masses within the same box.
+                </p>
+            </li>
+            <li><a href="#part5">Part 5: Shading</a>
+                <p>
+                    We implemented various GLSL shader programs for diffuse and blinn-phong materials. We also 
+                    supported shaders for texture mapping, bump and displacement mapping, a reflective
+                    mirror-like material, and a toon shader.
+                </p>
+             </li>
+             <li><a href="#part6">Part 6: Wind Solver</a>
+                <p>
+                    We added wind to the cloth simulation by creating a sinusoidal wind field
+                    and applying the force due to the field to the cloth.
+                </p>
+             </li>
+        </p>
+
+        <h2 align="middle" id="part1">Part 1: Masses and springs</h2>
+        <div align="middle">
+            <table style="width:100%">
+                <tr align="center">
+                    <td>
+                        <img src="images/part1/noshearing.png" align="middle" width="500px;" />
+                        <figcaption>wireframe without any shearing constraints</figcaption>
+                    </td>
+                    <td>
+                        <img src="images/part1/onlyshearing.png" align="middle" width="500px;" />
+                        <figcaption>wireframe with only shearing constraints</figcaption>
+                    </td>
+
+
+                </tr>
+                <tr align="center">
+                    <td colspan="2">
+                        <img src="images/part1/allconstraints.png" align="middle" width="500px;" />
+                        <figcaption>wireframe with all constraints</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <p>
+            We initialized a grid of point masses and filled in each point mass's attribute. For example,
+            we needed to determine whether or not a point mass was pinned (so that part of the cloth wouldn't
+            fall during simulation), and what the point mass's position is. Additionally, we needed to initialize
+            spring forces between each point mass. There are three springs that we implemented to simulate the cloth:
+            <ol>
+                <li>Structural constraints, which exist between point masses directly above, below, left, or right of
+                    a given point mass
+                </li>
+                <li>Shearing constraints, which exist between point masses diagonal to each other</li>
+                <li>Bending constraints, which exist between a point mass and another point mass, two away from each other,
+                    either above, below, left, or right
+                </li>
+            </ol>
+        </p>
+        <p>
+            Most of the debugging included making sure that the spring constraints were implemented
+            correctly, as there are lots of edge cases to take into account (for example, we will not
+            initialize any springs for a point mass on the upper-left most corner, and a point mass on the
+            rightmost side won't have one of the shearing constraints, and sometimes structural or bending constraints
+            for the upper one or two point masses). 
+        </p>
+        <br />
+
+        <h2 align="middle" id="part2">Part 2: Simulation via numerical integration</h2>
+        <p>
+            We implemented basic cloth simulation due to internal and external forces on the cloth.
+            First, we calculated the contribution of the force on a particular point mass due to external forces
+            (such as gravity) using Newton's 2nd law, which states that:
+        </p>
+            <div class="mathjax">
+                \(F = ma\)
+             </div>
+         <p>
+            where F is the force, m is the mass, and a is the acceleration (for this project, a is just the force due to 
+             gravity).
+        </p>
+        <p>
+             Next, we calculated the contribution due to intrinsic forces in the cloth, namely, those due to the spring
+              constraints. The force applied due to a spring is given by Hooke's law, which states that:
+        </p>
+        <div class="mathjax">
+            \(F_s = k_s * (||p_a - p_b|| - l)\)
+        </div>
+        <p>
+            where F_s is the force due to a spring, k_s is the spring constant, p_a and p_b refer to positions
+            of point masses a and b respectively, and l is the spring mass's rest length.
+        </p>
+        <p>
+            Since we want our bending constraints to be weaker, we scaled the force down due to bending
+            constraints by a factor of 0.2.
+        </p>
+        <p>
+            Next, we used Verlet integration to compute the new positions of each point mass due to
+            the net force caluclated, as explained above. At the next time interval, the updated position
+            is expressed as
+        </p>
+            <div class="mathjax">
+                \(
+                    x_{t+dt} = x_t + v_t*dt+a_t*dt^2
+                    \)
+         </div>
+            <p>
+             Adding some damping in our simulation and because we have access to the position at time t-dt, we can then rewrite the above equation as:
+        </p>
+        <div class="mathjax">
+            \(
+                x_{t+dt} = x_t + (1-d)*(x_t -  x_{t+-dt} )+a_t*dt^2
+                \)
+        </div>
+        <p>
+            Lastly, to ensure that the distance due to each point mass doesn't get unreasonably large,
+            we take inspiration from the<a href="https://www.cs.rpi.edu/~cutler/classes/advancedgraphics/S14/papers/provot_cloth_simulation_96.pdf">
+                 SIGGRAPH 1995 Provot paper
+            </a> and only allow the distance between each point mass to be at most 10% greater than its rest length.
+        </p>
+        <div>
+            <h3>Spring Constant Analsysis</h3> <br />
+        </div>
+        <div class="image-container">
+            <figure>
+                <img src="images/part2/bullet1/lowk.png" alt="ks = 500 N/m" />
+                <figcaption>ks = 500 N/m</figcaption>
+            </figure>
+            <figure>
+                <img src="images/part2/defaultpinned2.png" alt="ks = 5000 N/m" />
+                <figcaption>ks = 5000 N/m</figcaption>
+            </figure>
+            
+            <figure>
+                <img src="images/part2/bullet1/highk.png" alt="ks = 50000 N/m" />
+                <figcaption>ks = 50000 N/m</figcaption>
+            </figure>
+        </div>
+        <div>
+            <p>
+                From observation of the images above, as the spring constant value increases, the cloth becomes more stiff and less droopy.
+                This physical effect is explained by the fact that increasing the constant creates a sturdier spring which leads to the effect
+                of not appearing as elastic for higher values of k. As we run the cloth sim, we notice for smaller 
+                values of k that the cloth behaves more like a thin sheet, kind of like silk. For larger values of k, the cloth 
+                behaves more like a sheet of stiff paper - less flowy movement per point mass as the cloth drops.
+            </p>
+        </div>
+
+
+        <div>
+            <h3>Density Analysis</h3> <br />
+        </div>
+        <div class="image-container">
+            
+            <figure>
+                <img src="images/part2/bullet2/lowdensity.png" alt="ks = 500 N/m" />
+                <figcaption>density = 1.5 g/cm^2</figcaption>
+            </figure>
+            <figure>
+                <img src="images/part2/defaultpinned2.png" alt="ks = 5000 N/m" />
+                <figcaption>density = 15 g/cm^2</figcaption>
+            </figure>
+            <figure>
+                <img src="images/part2/bullet2/highdensity.png" alt="ks = 50000 N/m" />
+                <figcaption>density = 150 g/cm^2</figcaption>
+            </figure>
+        </div>
+        <div>
+            <p>
+                As the density of the point masses increase, the cloth becomes similar to that of a 
+                lower spring constant.
+                The reason why changing the density value has the opposite effect of changing
+                the spring constant is due to the fact that an increase in density corresponds to
+                an increase in the point mass's mass, and thus, the point mass's mass would be affected
+                by external forces such as the force due to gravity more than the force due to the surrounding springs.
+            </p>
+        </div>
+
+        <h3>Damping Analysis</h3> <br />
+    <div class="image-container">
+        <figure>
+            <img src="images/part2/bullet3/lowdamping.png" alt="ks = 500 N/m" />
+            <figcaption>damping = 0.0%</figcaption>
+        </figure>
+        <figure>
+            <img src="images/part2/defaultpinned2.png" alt="ks = 5000 N/m" />
+            <figcaption>damping = 0.2%</figcaption>
+        </figure>
+        
+        <figure>
+            <img src="images/part2/bullet3/highdamping.png" alt="ks = 50000 N/m" />
+            <figcaption>density = 1.0%</figcaption>
+        </figure>
+    </div>
+    <div>
+        <p>
+            As the damping value increases, the cloth appears less wrinkly. Another way to describe the difference
+            is the fact that the cloth comes to rest a lot faster that lower damping percentages and this is more apparent
+            in the animation of cloth falling. Still, there are renmants that display the small pertubations. For example,
+            in the image that displays damping at 0%, the ends of the fabric is still moving even after a long duration of letting
+            the animation run. The image that shows damping at 1%, however, came to rest immediatly with totally straightened-out
+            cloth at its ends.
+        </p>
+    </div>
+
+    <div align="middle">
+        <table style="width:100%">
+            <tr align="center">
+                <td>
+                    <img src="images/part2/defaultpinned4.png" align="middle" width="400px" />
+                    <figcaption>pinned4.json with default settings</figcaption>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <h2 align="middle" id="part3">Part 3: Handling collisions with other objects</h2>
+   <p>
+        We handled collisions with spheres and planes. In the case of the sphere, we checked to 
+        see if a given point mass's position was within the sphere (if the distance from the center
+        of the sphere to the point mass is less than or equal to the radius of the sphere). If so,
+        we updated the position so that it is just above the sphere's surface throught the use of a 
+        correction vector.
+    </p>
+    <p>
+        In the case of a plane, we checked for collision by determining if a given point mass
+        had fallen from one side of the plane to the other. If so, we updated the position to 
+        be on the former side of the plane. In order to implement this, we checked the sign
+        of the dot product due to the surface normal of the plane and the vector from a given 
+        point on the plane to the position of the point mass. If the sign of the dot product
+        changed in a single time step, we know that the point mass had fallen from one side to
+        the other.
+    </p>
+    <p>
+        Additionally, we applied a frictional force to the cloth and the sphere, so that the 
+        cloth would not slide off the sphere and the plane. 
+   </p>
+    <div class="image-container">
+        <figure>
+            <img src="images/part3/defaultsphere.png" alt="ks = 5000 N/m" />
+            <figcaption>ks = 5000 N/m</figcaption>
+        </figure>
+        <figure>
+            <img src="images/part3/lowk.png" alt="ks = 500 N/m" />
+            <figcaption>ks = 500 N/m</figcaption>
+        </figure>
+        <figure>
+            <img src="images/part3/highk.png" alt="ks = 50000 N/m" />
+            <figcaption>ks = 50000 N/m</figcaption>
+        </figure>
+    </div>
+    <div>
+        <p>
+            As the spring constant increases, the way the fabric sits on the sphere becomes more stiff. As mentioned before,
+            this is due to the fact that the forces of the spring become stronger making the cloth less elastic.
+        </p>
+    </div>
+    <div align="middle">
+        <table style="width:100%">
+            <tr align="center">
+                <td>
+                    <img src="images/part3/restingplane.png" align="middle" width="400px" />
+                    <figcaption>collision with a plane</figcaption>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+
+    <h2 align="middle" id="part4">Part 4: Handling self-collisions</h2>
+   <p>
+    One issue in our current implementation was that the cloth was clipping in itself. Thus, we
+    handled self-collisions via a hash table, where we store point masses in a particular hash if 
+    they are neighboring each other. If we were to take each point mass and add up the force
+    due to collision from all the point masses in the cloth, this would take n^2 time per time step.
+    Thus, spatial hashing provides a faster, n-time algorithm for us to check collisions for each point mass.
+   </p>
+   <p>
+    In order to create our hash function, we virtually partitioned 3D space into 3D boxes with size
+   </p>
+   <div class="mathjax">
+    \(
+        w*h*max(w,h)
+        \)
+    </div>
+<p>
+    where <code>w=3*width_of_the_cloth/num_width_points</code>, <code>h=3 * height_of_the_cloth / num_height_points</code>.
+    We let the origin of the 3D space correspond to the corner for all 8 of these boxes. In other words,
+    imagine that one wall of the box lay every <code>h</code> units in the z direction, w units in the x direction,
+    and max(w,h) units in the y direction. If a particular point mass is within a certain box, we
+    assign the point mass to that box in the hash table. Since hash values are represented as floats,
+    we decided to floor divide each point mass's position by the dimensions of the box (which outputs the 
+    vertex of the box closest to the origin; this is a <i>unique value</i> per box), and then took the 
+    linear combination of the output:
+</p>
+<div class="mathjax">
+    \(
+        hashvalue = 101* box_x + 103 * box_y + 107 * box_z
+        \)
+</div>
+    <p>
+        The reason why we chose 101, 103, and 107 specifically is because they are large (enough) 
+        prime numbers, so the chances of getting the same hash value for two different coordinates close to each
+        other (enough to affect the efficiency of calculating self-collisions) would be low. 
+    </p>
+    <p>
+        When we actually implement the self-collision, we need to make sure for a given point mass, that
+        the other point masses belonging in the same hash value contribute to the correction vector of the 
+        given point mass.
+        We want to make sure this happens if the point mass is within 2*thickness apart from another 
+        point mass. 
+    </p>
+
+    <div align="middle">
+        <table style="width:100%">
+            <tr align="center">
+                <td>
+                    <img src="images/part4/default/initial.png" align="middle" width="400px" />
+                    <figcaption>cloth falling initially</figcaption>
+                </td>
+                <td>
+                    <img src="images/part4/default/middle.png" align="middle" width="400px" />
+                    <figcaption>cloth falling halfway</figcaption>
+                </td>
+
+
+            </tr>
+            <tr align="center">
+                <td colspan="2">
+                    <img src="images/part4/default/final.png" align="middle" width="400px" />
+                    <figcaption>cloth fallen</figcaption>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <h3>Varying Spring Constant Values</h3>
+    <p>Throughout the entire simulation, we see that the cloth's mesh doesn't clip
+        into itself. We implemented a data structure that allow us to test for collisions
+        with point masses in surrounding boxes, and apply repulsive forces among them in 
+        order to avoid clipping.
+    </p>
+    <div class="image-container">
+        <figure>
+            <img src="images/part4/bullet2ks/lowk.png" alt="ks = 500 N/m" />
+            <figcaption>ks = 500 N/m</figcaption>
+        </figure>
+        <figure>
+            <img src="images/part4/default/final.png" alt="ks = 5000 N/m" />
+            <figcaption>ks = 5000 N/m</figcaption>
+        </figure>
+        <figure>
+            <img src="images/part4/bullet2ks/highk.png" alt="ks = 50000 N/m" />
+            <figcaption>ks = 50000 N/m</figcaption>
+        </figure>
+    </div>
+    <p>
+        As the value of the spring constant increases, the cloth appears to be more stiff in its fallen resting position, as explained 
+        in part 2. 
+    </p>
+
+    <h3>Varying Density Values</h3>
+    <div class="image-container">
+        <figure>
+            <img src="images/part4/bullet2density/lowdensity.png" alt="ks = 500 N/m" />
+            <figcaption>density = 1.5 g/cm^2</figcaption>
+        </figure>
+        <figure>
+            <img src="images/part4/default/final.png" alt="ks = 5000 N/m" />
+            <figcaption>density = 15 g/cm^2</figcaption>
+        </figure>
+        <figure>
+            <img src="images/part4/bullet2density/highdensity.png" alt="ks = 50000 N/m" />
+            <figcaption>density = 150 g/cm^2</figcaption>
+        </figure>
+    </div>
+    <p>
+        As the density increases, the cloth appears to less stiffer, similar to smaller values of ks,
+        and more stiffer as density decreases, as explained in part 2.
+    </p>
+
+    <h2 align="middle" id="part5">Part 5: Shading</h2>
+    <h3>
+        What is a shader program and how vertex and fragment shaders work together to create lighting
+        and material effects?
+    </h3>
+    <p>
+        A GLSL shader program offers a way to render simple materials in meshes in a fairly inexpensive way (as opposed to physically-based
+        raytracing). Such a program consists of a vertex shader, and a fragment shader; A vertex shader applies transformations to vertices (such as scaling,
+        rotation, and translation) and passes data to the fragment shader. The fragment shader processes fragments (pixels)
+        generated by rasterizing primitives and generates a color for each pixel. 
+    </p>
+    <p>
+        They work together by taking the output of the vertex shader and passing the data to fragment shader;
+        this output consists of the final position of the vertex in screen space, vertex normals, vertex tangents, UV coordinates, etc.
+        The fragment shader takes the vertex shader's outputs as its inputs and calculates the final color of each fragment by
+        calculating the final color of a particular vertex, and interpolating it across the entire mesh due to the colors of other
+        vertices.
+    </p>
+    <h3>
+        Explain the Blinn-Phong shading model in your own words.
+    </h3>
+    <p>
+        Blinn-Phong combines ambient, diffuse, and specular components of lighting.
+        Ambient lighting represents the overall light that illuminates all parts of the object uniformly.
+        Diffuse lighting represents the light scattered equally in all directions off a matte surface.
+        It's calculated using the Lambert cosine law, which involves the dot product between the surface normal and the
+        direction of the light vector. In other words, the surface normals of an object will appear brighter if they 
+        point towards the direction of the light source, and dimmer, if away. Specular lighting represents the highlights on glossy surfaces. It's calculated using
+        the halfway vector between the direction of the light source and the direction of the viewer (eye). The intensity of
+        specular reflection is determined by the dot product between the halfway vector and the surface normal raised to a
+        power known as the shininess coefficient.
+    </p>
+
+    <div align="middle">
+        <table style="width:100%">
+            <tr align="center">
+                <td>
+                    <img src="images/part5/bullet2/blinnphong/bpambient.png" align="middle" width="400px" />
+                    <figcaption>Ambient Component (we set to completely black)</figcaption>
+                </td>
+                <td>
+                    <img src="images/part5/bullet2/blinnphong/bpdiffuse.png" align="middle" width="400px" />
+                    <figcaption>Diffuse Component</figcaption>
+                </td>
+            </tr>
+            <tr align="center">
+                <td>
+                    <img src="images/part5/bullet2/blinnphong/bpspecular.png" align="middle" width="400px" />
+                    <figcaption>Specular Component</figcaption>
+                </td>
+                <td>
+                    <img src="images/part5/bullet2/blinnphong/bptogether.png" align="middle" width="400px" />
+                    <figcaption>Complete Blinn-Phong Shading with default parameters</figcaption>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <br />
+
+    <h3>Custom Texture</h3>
+    <div align="middle">
+        <table style="width:100%">
+            <tr align="center">
+                <td>
+                    <img src="images/part5/bullet3/customplane.png" align="middle" width="400px" />
+                    <figcaption>custom cloth texture</figcaption>
+                </td>
+                <td>
+                    <img src="images/part5/bullet3/custom.png" align="middle" width="400px" />
+                    <figcaption>custom cloth texture with collision</figcaption>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <h3>Bump and Displacement Mapping</h3>
+    <p>Describe the methodology ofdisplacement and bump maps</p>
+    <div align="middle">
+        <table style="width:100%">
+            <tr align="center">
+                <td>
+                    <img src="images/part5/bullet4/bumpsphere.png" align="middle" height="300px" />
+                    <figcaption>A bump map on a sphere</figcaption>
+                </td>
+                <td>
+                    <img src="images/part5/bullet4/bumpcloth.png" align="middle" height="300px" />
+                    <figcaption>A bump map on the cloth</figcaption>
+                </td>
+                
+                <td>
+                    <img src="images/part5/bullet4/bumpclothsphere.png" align="middle" height="300px" />
+                    <figcaption>A bump map on the cloth and sphere</figcaption>
+                </td>
+               
+            </tr>
+            <tr align="center">
+                <td>
+                    <img src="images/part5/bullet4/dispsphere.png" align="middle" height="300px" />
+                    <figcaption>Displacement map on a sphere</figcaption>
+                </td>
+                <td>
+                    <img src="images/part5/bullet4/dispcloth.png" align="middle" height="300px" />
+                    <figcaption>Displacement map on the cloth</figcaption>
+                </td>
+                <td>
+                    <img src="images/part5/bullet4/dispclothsphere.png" align="middle" height="300px" />
+                    <figcaption>Displacement map on the cloth and sphere</figcaption>
+                </td>
+                
+               
+            </tr>
+        </table>
+    </div>
+    <p>There is a noticeable difference in bump and displacement mapping in the sphere and cloth's silhouette. In the 
+        bump map case, we see no change in the sphere and cloth's geometry. In the displacement map's case, we see 
+        that the geometry changes where the grooves of the brick texture are. In the image where the cloth is 
+        draped over the sphere, we notice the cloth looks puffier than the bump map case.
+    </p>
+    
+    <div align="middle">
+        <table style="width:100%">
+            <tr align="center">
+                <td>
+                    <img src="images/part5/bullet4/bump16.png" align="middle" width="400px" />
+                    <figcaption>bump mapping on 16x16 samples</figcaption>
+                </td>
+                <td>
+                    <img src="images/part5/bullet4/disp16.png" align="middle" width="400px" />
+                    <figcaption>displacement mapping on 16x16 samples</figcaption>
+                </td>
+            </tr>
+            <tr align="center">
+                <td>
+                    <img src="images/part5/bullet4/bump128.png" align="middle" width="400px" />
+                    <figcaption>bump mapping on 128x128 samples</figcaption>
+                </td>
+                <td>
+                    <img src="images/part5/bullet4/disp128.png" align="middle" width="400px" />
+                    <figcaption>displacement mapping on 128x128 samples</figcaption>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <p>
+        We see that a higher number of samples corresponds to a better resolution in the bump and 
+        displacement map's silhouette. The nxn samples correspond to the number of vertices 
+        that show up in the geometry (note the low-poly silhouette of the 16x16 bump-mapping example
+        compared to the 128x128, which has a smoother geometry). In the displacement mapping case, we
+        note that the silhouette seems better defined with a higher number of samples, whereas the 16x16
+        case results is a slightly jarring, lower-poly look. However, bump-mapping seems to perform better
+        with a smaller amount of samples since the output with 16x16 samples and 128x128 samples look
+        the same.
+
+    </p>
+
+    <h3>Mirror Shader</h3>
+    <div align="middle">
+        <table style="width:100%">
+            <tr align="center">
+                <td>
+                    <img src="images/part5/bullet5/mirrorplane.png" align="middle" width="400px" />
+                    <figcaption>mirror shader</figcaption>
+                </td>
+                <td>
+                    <img src="images/part5/bullet5.png" align="middle" width="400px" />
+                    <figcaption>mirror shader with collision</figcaption>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <h3>Custom Shader</h3>
+    <video controls width="400px;">
+        <source src="images/xtracredot/clothtoon.mov" type="video/mp4" >
+        Your browser does not support the video tag.
+    </video>
+    <p>We created a custom GLSL fragment shader that changes colors depending on the position of the 
+        camera to the origin, and gives it a toon-shading effect! We achieved this by calculating
+        the diffuse of the object, and determining whether the amount of light emitted from the object
+        is greater than or equal to 0.4. If so, we assign it a warm color. If not, we assign it a cool
+        color, added on with some color changes due to the camera's position.
+    </p>
+
+    <h2 align="middle" id="part6">Extra Credit</h2>
+    <p>
+        We implemented a simplified wind solver which takes in a point mass and a Vector3D wind direction as arguments. 
+        The force contribution comes from multiplying the mass of the point mass with
+        the acceleration due to a sinuosoidal wind field, calculated as follows given a particular x, y, and z basis:
+    </p>
+    <div class="mathjax">
+        \(
+            windfield.x =  winddirection.x * sin(2 \pi * (pointmassposition.x \mathbin{\%} freq) / freq))
+            \)
+    </div>
+    <p>
+        For our cases, we set the frequency to 1. We then   
+        calculated a dot product between the vector form of the wind solver and 
+        the normal vector of the point mass to determine how much of the wind will affect
+        the cloth. Additionally, we added a small jitter vector (by generating a small random Vector3D
+        contribution) to simulate randomness within the wind solver.
+    </p>
+    <p>
+    
+        Here are some of the results from the wind solver:
+    </p>
+    <table>
+        <video controls width="400px;">
+            <source src="images/xtracredot/windsolver.mov" type="video/mp4" >
+            Your browser does not support the video tag.
+        </video>
+                    <figcaption>Our wind solver in action</figcaption>
+                
+            <tr align="center">
+                <td>
+                    <img src="images/xtracredot/windsolver3.png" align="middle" height="250px" />
+                    <figcaption>A loose piece of cloth in the air!</figcaption>
+                </td>
+                <td>
+                    <img src="images/xtracredot/windsolver1.png" align="middle" height="250px" />
+                    <figcaption>The ball is watching</figcaption>
+                </td>
+                <td>
+                    <img src="images/xtracredot/windsolver2.png" align="middle" height="250px" />
+                    <figcaption>4 pinned points with our wind solver</figcaption>
+                </td>
+               
+            </tr>
+        </table>
+    
+   
+</body>
+</html>
