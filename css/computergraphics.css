@@ -49,6 +49,9 @@ body {
 hr {
   border: 1px solid burlywood;
 }
+video{
+  height: 300px;
+}
 
 #ucberkeley2025 {
   color: rgb(131, 131, 131);
