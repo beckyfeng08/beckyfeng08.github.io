@@ -1,0 +1,225 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <style>
+    body {
+      padding: 100px;
+      width: 1000px;
+      margin: auto;
+      text-align: center;
+      align-items: center;
+      text-align: center;
+      justify-content: center;
+      font-weight: 300;
+      font-family: 'Futura', 'Playfair Display';
+      color: #f4f4f4;
+      background-color: rgb(21, 21, 21);
+    }
+    h1, h2, h3, h4 {
+      font-family: 'Futura';
+    }
+    h2, h3, h4 {
+      color: rgb(227, 227, 227);
+      margin-top:5%;
+    }
+    img {
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+   
+    p {
+      font-family: 'Open Sans';
+      font-size: 20px;
+      color: rgb(209, 209, 209);
+    }
+    .center {
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
+    }
+    .centerimg {
+      display:block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+ 
+    code {
+      background-color: rgb(73, 73, 73);
+    }
+    figcaption {
+      font-family: 'Open Sans';
+      color: rgb(209, 209, 209);
+      font-size: 15px;
+    }
+   
+   ol {
+    font-family: 'Open Sans';
+    color: rgb(209, 209, 209);
+   }
+  
+   li {
+    text-align: left;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-top: 5%;
+   }
+  th, td {
+    padding: 10px;
+  }
+  a {
+    color:white;
+  }
+  html {
+              scroll-behavior: smooth;
+          }
+  
+  </style>
+<title>CS 184 Final Project Checkpoint</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+
+<script>
+  MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']]
+    }
+  };
+</script>
+<script id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+
+</head>
+
+
+<body>
+
+<h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2024</h1>
+<h1 align="middle">Final Project Checkpoint</h1>
+<h2 align="middle">Rebecca Feng Khai Sam, Olivia Xie, and Mahum Khan</h2>
+<p><a href="https://youtu.be/RssQd63Vcjc">Link to milestone video</a></p>
+<p><a href="https://docs.google.com/presentation/d/1ttlKyrX_6fdwcn2tmiuoDItunPESz50RcYs3Eyk-9UY/edit?usp=sharing">Link to progress slides</a></p>
+<h3>Our Goal</h3>
+<p>
+  Our project involves creating a mini texture mapping tool, where the user can
+   modify or create a texture on a mini drawing app, and then press
+    a button to map the image texture onto the model. 
+  </p>
+  <img src = "images/guidrawing.jpg" width = "500px">
+ 
+<h3>What we have accomplished</h3>
+
+    <ol>
+      <li>
+        <b>Implementation of texture mapping.</b>
+        <br>
+        <br>
+        We extracted vertex positions and UV coordinates from a .dae 
+        file and passed them to the shaders to be rendered.
+        <br>
+        <table class="center">
+          <tr>
+            <th>
+            <img src="images/blah.jpeg"  height = "300px">
+            <figcaption class="center">The sample texture</figcaption>
+          </th>
+          <th>
+           <img src="images/beantxt1.jpeg" height = "300px">
+           <figcaption class="center">The sample texture mapped onto the bean</figcaption>
+          </th>
+          </tr>
+        </table>
+         
+        <br>
+        The object’s UV coordinates are incorrectly placed for each
+        vertex. In theory, multiple UV coordinates share the same vertex. However, OpenGL only allows for one texture coordinate
+        per vertex. Thus, we will create a new vertex for each UV coordinate,
+           by directly reading the Polymesh data structure (which holds all the information 
+           about each vertex, its normals, and its texture coordinates).
+  
+      </li>
+      <li><b>Implementation of png texture imports, edits, and exports. </b>
+        <br>
+        <br>
+        We imported the lodepng library and created a class wrapper
+         to abstract the underlying library calls. We have successfully imported a png file, 
+         edited its pixel values, and exported it. 
+         <table class="center">
+          <tr>
+            <th>
+            <img src="images/envmap.jpeg"  height = "200px">
+            <figcaption class="center">The original image</figcaption>
+          </th>
+          <th>
+           <img src="images/envmap_editted.png" height = "200px">
+           <figcaption class="center">The modified PNG using our code</figcaption>
+          </th>
+          </tr>
+        </table>
+      
+        Furthermore, we were able to separate edits onto a separate layer 
+        so that an eraser tool can be applied to recover the original png values.
+      </li>
+      <li>
+        <b>Implementation of GUI</b>
+        <br><br>
+        We have successfully implemented split-screen.
+        <br>
+        <br>
+        <img src="images/gui.jpeg" class="centerimg" width="500px">
+      </li>
+    </ol>
+   
+<h3>Progress relative to plan</h3>
+<p>Project work is progressing; albeit, delayed due to unexpected cross-platform 
+  bugs between Windows and Mac and difficulty understanding OpenGL 2.1. We are still 
+  working on base requirements.</p>
+<h3> Updated work plan</h3>
+<table>
+  <tr >
+    <th>Week of Apr 16</th>
+    <td>
+      <ul>
+        <li>Implement UI (buttons, etc.) - Olivia </li>
+        <li>Fix split screen dimensions and lag</li>
+        <li> Display texture on right-screen.</li>
+        <li>Fix texture mapping - Rebecca</li>
+        <li>Implement brush features</li>
+      </ul>
+      
+    </td>
+  </tr>
+  <tr>
+    <th>Week of Apr 23</th>
+    <td>
+      <ul>
+        <li>Finish implementing brush features</li>
+        <li>Implement materials-related features if time
+        </li>
+        <li>Clean up codebase</li>
+        <li>Debug</li>
+      </ul>
+      
+      </td> 
+  </tr>
+  <tr>
+    <th>Week of Apr 30</th>
+    <td>
+      <ul>
+       <li>Debug</li>
+       <li>Make presentation</li> 
+        
+      </ul>
+      
+      </td> 
+  </tr>
+</table>
+
+
+</body>
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+</html>
