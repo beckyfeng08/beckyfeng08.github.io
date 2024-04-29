@@ -129,21 +129,49 @@
 <h2> Technical Approach</h2>
 <p>
     We broke our project down into several subparts:
+    </p>
     <ol>
         <li>
             Creating a WebGL 3D mesh renderer that can handle texture mapping
+            <p>
+                We followed the ThreeJS documentation to render something on the 
+                screen by setting up a WebGL viewer, a camera, lights, materials, 
+                a mesh object, interactivity with the viewer, and set up a raycaster. 
+                We also created a list of file paths that referred to a list of mesh 
+                objects that we can load when the user presses “Generate Mesh.”
+            </p>
         </li>
         <li>
             Creating a working drawing app
+            <p>
+                We expanded upon the <a href="https://www.youtube.com/watch?v=y84tBZo8GFo">code 
+                from CodingNepal </a>for our drawing app. 
+                This implementation is based on the HTML canvas element. Modifications we made 
+                (other than the CSS styling) include displaying brush/eraser size as a circle 
+                around the moving cursor and supporting texture import and UV display features. 
+                We also fixed some details about the original drawing application such as smoother
+                 lines and correct alignment of the brush on resized windows.
 
+            </p>
         </li>
         <li>
             Combining the 3D renderer and drawing app for cross-functionality
-
+            <p>
+                ThreeJS supports the use of reading a texture file off of an HTML canvas element.
+                 We utilized this to directly render a texture map onto our mesh from the drawing app. 
+                 Because it would be costly to have to update the texture every frame, we chose to only
+                update it when the user draws on the screen.
+            </p>
         </li>
         <li>
             Importing and exporting mesh and texture files
+            <p>
+                To implement support for importing files, we began an instance of createElement('input').
+                 This allowed us to define the type of file that we can import and what to do with the contents. 
+                 Inside the function for the texture images, we mapped it onto the loaded mesh. For loading in a 
+                 GTLF/GLB, the variables that define the mesh are adjusted to the new mesh that was imported. 
 
+            </p>
         </li>
         <li>
             Implement raycasting in order to draw onto the mesh
@@ -176,6 +204,14 @@
             <figcaption >Our raycasting implementation on the banana mesh, a visualization</figcaption>
         </li>
     </ol>
+<p>
+    Along the way, we encountered various issues with our project that we had to solve. We highlight the
+    two most prominent problems we successfully tackled below:
+    <ul>
+        <li></li>
+        <li></li>
+    </ul>
+
 </p>
 
 <h2>Results</h2>
@@ -193,7 +229,7 @@
     <li><a href=" https://www.youtube.com/watch?v=YK1Sw_hnm58" >
         Learn Three.js from Scratch: Crash Course Tutorial
     </a></li>
-    <li><a href="ttps://www.youtube.com/watch?v=y84tBZo8GFo
+    <li><a href="https://www.youtube.com/watch?v=y84tBZo8GFo
         ">
         Build A Drawing or Paint App in HTML CSS & JavaScript | Drawing App in JavaScript
     </a></li>
