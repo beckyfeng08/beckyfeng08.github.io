@@ -78,6 +78,10 @@
   html {
               scroll-behavior: smooth;
           }
+
+    #references, li {
+        margin-top: 1%;
+    }
   
   </style>
 <title>CS 184 Final Project Page</title>
@@ -177,7 +181,7 @@
 <h2>Results</h2>
 
 <h2>References</h2>
-<ul>
+<ul id="reference">
     <li>
         <a href="https://threejs.org/docs/index.html#manual/en/introduction/Creating-a-scene">
             ThreeJS Documentation
@@ -193,21 +197,73 @@
         ">
         Build A Drawing or Paint App in HTML CSS & JavaScript | Drawing App in JavaScript
     </a></li>
-    <li><a href="">
+    <li><a href="https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL_static">
+        URL: createObjectURL() static method
+    </a></li>
+     <li><a href="https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API">
+        Canvas API
+    </a></li>
+    <li><a href="https://threejs.org/examples/?q=canvas#webgl_materials_texture_canvas" >
+        webgl_materials_texture_canvas demo
+    </a></li>
+    <li><a href="https://threejs.org/examples/?q=raycast#webgl_instancing_raycast">
+        webgl_instancing_raycast demo
+    </a></li>
+    <li><a href="https://stackoverflow.com/questions/67864724/threejs-load-gltf-model-directly-from-file-input">
+        ThreeJS Load GLTF Model Directly From File Input
+    </a></li>
+    <li><a href="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js">
+        WebGL Matrix and Vector Operations
+    </a></li>
+    <li><a href="https://javascript.info/promise-basics">
+        Promise API
+    </a></li>
+    <li><a href="https://discourse.threejs.org/t/how-get-faces-triangle-data-from-buffergeometry/22906/2">
+        How get faces( triangle ) data from buffergeometry
+    </a></li>
+    <li><a href="https://tomtung.github.io/chameleon.js/">
+        Chameleon.js
+    </a></li>
+</ul>
 
-    </a></li>
-     <li><a href="">
+<h2>Contributions from each team member</h2>
+<ul>
+    <li>
+        Rebecca Feng:
+        <p>
+            Created the 3D WebGL interface and controls using the ThreeJS API,
+             implemented cross-compatibility with the drawing app and 3D viewer
+             , implemented raycasting and UV coordinate transformations for drawing
+              on mesh directly, created the list of meshes to generate, implemented 
+             the opacity slider, and attempted to UV map on the deprecated MeshEdit 
+             version of our project. Also modeled the anime head.
 
-    </a></li>
-    <li><a href="" >
+        </p>
+    </li>
+    <li>
+        Khai Sam:
+        <p>
+            Implemented promise handling for preloading assets, added a toggleable
+             UV mesh layer for the canvas, did general debugging, and developed draw 
+             code and import code in deprecated MeshEdit version.
 
-    </a></li>
-    <li><a href="">
+        </p>
+    </li>
+    <li>
+        Olivia Xie:
+        <p>
+            Implemented brush/erase, drawing app, website styling.
 
-    </a></li>
-    <li><a href="">
-        
-    </a></li>
+        </p>
+    </li>
+    <li>
+        Mahum Khan:
+        <p>
+            Loading in gtlf/glb files, implementing imports so users can input their own 
+            texture or models 
+
+        </p>
+    </li>
 </ul>
 </body>
 <script type="text/javascript" async
