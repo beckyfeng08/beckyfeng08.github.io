@@ -144,6 +144,8 @@
                 We also created a list of file paths that referred to a list of mesh 
                 objects that we can load when the user presses “Generate Mesh.”
             </p>
+            <!-- show working texture image of cow -->
+            
         </li>
         <li>
             Creating a working drawing app
@@ -157,6 +159,7 @@
                  lines and correct alignment of the brush on resized windows.
 
             </p>
+            <!-- photo of the drawing app itself -->
         </li>
         <li>
             Combining the 3D renderer and drawing app for cross-functionality
@@ -166,6 +169,11 @@
                  Because it would be costly to have to update the texture every frame, we chose to only
                 update it when the user draws on the screen.
             </p>
+            <p>
+                We had to debug this by rendering a cube rather than an imported mesh, since we were running into
+                loading errors simultaneously. This problem was later fixed <a href="#problems"> as described here</a>.
+            </p>
+            <!-- video of the cube painting on -->
         </li>
         <li>
             Importing and exporting mesh and texture files
@@ -209,7 +217,7 @@
         </li>
     </ol>
 <p>
-    <b>Along the way, we encountered various issues with our project that we had to solve. We highlight the
+    <b id="problems">Along the way, we encountered various issues with our project that we had to solve. We highlight the
     two most prominent problems we successfully tackled below:</b>
 </p>
     <ul>
