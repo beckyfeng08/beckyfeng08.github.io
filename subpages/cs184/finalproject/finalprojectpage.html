@@ -120,7 +120,7 @@
 
 <p>
     Our platform offers a fast and simple user interface for texturing meshes, catering to quick
-    and casual needs, unlike more complex solutions such as 3D Substance Painter or Blender, 
+    and casual needs, unlike more complex solutions such as 3D Substance Painter or Blender which are often
     used in a more professional context. We achieved this by leveraging front-end tools like 
     the Node.js environment, the Three.js API (which provides methods for creating a WebGL viewer,
      loading meshes, textures, raycasting, etc.), and the Canvas HTML element.
@@ -207,12 +207,66 @@
 <p>
     Along the way, we encountered various issues with our project that we had to solve. We highlight the
     two most prominent problems we successfully tackled below:
-    <ul>
-        <li></li>
-        <li></li>
-    </ul>
-
 </p>
+    <ul>
+        <li>Handling automatic multithreading in a Javascript context
+            <p>
+                We experienced a lot of problems initially with timing. Sometimes assets are called before 
+                they are loaded. For example, the init function should be called first, where we initialize 
+                the mesh and lights, then the main function loop, where we read off of the information from 
+                the mesh. However, print debugging suggests that the assets haven’t yet finished loading until 
+                after the main function loop has already started. We solved this via Javascript’s Promise API 
+                holding the async and await system. Handling this was especially challenging when we had to combine
+                the WebGL renderer and the canvas together.
+
+            </p>
+        </li>
+        <li>
+            Initially using Meshedit as our codebase
+            <p>
+                Originally, we intended to expand the functionality of the MeshEdit code for our project. 
+                After working on this for three weeks, we opted to switch platforms because MeshEdit relies on OpenGL 2.1,
+                 which is largely deprecated on Windows and Linux computers. Additionally, we encountered suspected errors 
+                 within the texture coordinate and vertex buffers, causing our textures to render as individual triangles
+                  on the mesh.
+
+            </p>
+            <p>
+                After consulting with Prof. Ng and conducting our own research on the best graphics API for our purposes, we 
+                stumbled across the Three.js API. This high-level framework provides a comprehensive set of tools for 
+                implementing core graphics programs and algorithms in WebGL. Utilizing Three.js enables us to integrate our 
+                project into the UCBUGG: 3D Modeling and Animation course webpage, where two of us serve as facilitators. 
+                This integration aims to enhance students' understanding of UV mapping and texturing in a more intuitive
+                 manner, while also providing a faster and more accessible way to texture meshes for their semester-long 
+                 animated short film.
+
+            </p>
+        </li>
+    </ul>
+<p>
+    Throughout the time we spent workign on this project, we took away the following lessons:
+</p>
+<ul>
+    <li>All of us have minimal exposure to Javascript and fundamental front-end frameworks. This project allowed us to use 
+        concepts we learned in class, and implement them in a software engineering context.
+    </li>
+    <li>
+        Because Javascript runs in a multi-threaded context, we learned to leverage the Promise API to load necessary assets 
+        first before reading off of them.
+    </li>
+    <li>
+        We learned quite a bit of the backend behind the MeshEdit code, despite abandoning it 3/4th of the way through the project 
+        timeline. However, a lot of concepts taken from the MeshEdit code transferred over to learning the ThreeJS API, such as the
+         pipeline for creating a GL viewer, loading meshes and textures, and reading off of texture files, and that OpenGL 2.1 is 
+         deprecated on Windows computers.
+
+    </li>
+    <li>
+        We also learned some OpenGL 2.1 commands such as using it to create a textured mesh via a vertex and texture coordinate buffer, 
+        and memory allocation for storing mesh objects.
+    </li>
+</ul>
+
 
 <h2>Results</h2>
 
@@ -288,7 +342,7 @@
     <li>
         Olivia Xie:
         <p>
-            Implemented brush/erase, drawing app, website styling.
+            Implemented brush/erase, drawing app, texture export, website styling.
 
         </p>
     </li>
