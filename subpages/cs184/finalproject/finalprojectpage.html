@@ -240,6 +240,24 @@
             <img src="finalprojectimages/finalimages5.jpeg" width="700px" class="centerimg ">
             <figcaption >Our raycasting implementation on the banana mesh, a visualization</figcaption>
         </li>
+        <li>
+            Create a toggleable UV shell layer
+    <p>
+        The vertices of a face are connected and each vertex corresponds to one UV coordinate. To render
+        the UV shell layer, we iterate through the faces of the mesh, find the corresponding UV coordinates
+         and connect them into a triangle. The difficulty comes in identifying faces. In code, the faces are 
+         represented as a buffer of indices where each consecutive trio of indices form a face. We can use these 
+         indices to get the corresponding UV coordinates from the buffer.
+    
+    </p>
+    <p>
+        To make the UV shell toggleable, we used two canvas elements: “drawingapp” is the drawable texture layer 
+        and “uv-mesh” isolate the UV shells. By setting the position to “absolute” in CSS, we were able to stack 
+        the two canvas elements on top of each other, thus treating them as canvas “layers”. Now, we are able to 
+        draw and erase them separately.
+
+    </p>
+        </li>
     </ol>
 <p>
     <b id="problems">Along the way, we encountered various issues with our project that we had to solve. We highlight the
@@ -289,7 +307,7 @@
     </b>    </p>
 
 <ul>
-    <li>All of us have minimal exposure to Javascript and fundamental front-end frameworks. This project allowed us to use 
+    <li>All of us have had minimal exposure to Javascript and fundamental front-end frameworks before this project. This project allowed us to use 
         concepts we learned in class, and implement them in a software engineering context.
     </li>
     <li>
