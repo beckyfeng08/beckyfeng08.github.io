@@ -27,6 +27,7 @@
       justify-content: center;
       text-align: center;
     }
+ 
    
     p {
       font-family: 'Open Sans';
@@ -43,6 +44,10 @@
       margin-left: auto;
       margin-right: auto;
     }
+    video {
+  display: block;
+  margin: auto;
+}
  
     code {
       background-color: rgb(73, 73, 73);
@@ -138,14 +143,21 @@
         <li>
             Creating a WebGL 3D mesh renderer that can handle texture mapping
             <p>
-                We followed the ThreeJS documentation to render something on the 
-                screen by setting up a WebGL viewer, a camera, lights, materials, 
-                a mesh object, interactivity with the viewer, and set up a raycaster. 
+                We followed the ThreeJS documentation to render on the 
+                screen with a WebGL viewer, a camera, lights, materials, 
+                a mesh object, interactivity with the viewer, and setting up a raycaster. 
                 We also created a list of file paths that referred to a list of mesh 
                 objects that we can load when the user presses “Generate Mesh.”
             </p>
             <!-- show working texture image of cow -->
+            <br>
+            <video controls height="400px;">
+                <source src="finalprojectimages/progress1.mp4" type="video/mp4" >
+                Your browser does not support the video tag.
+            </video>
             
+            <br>
+            <figcaption> Progress of putting a texture on a cow rendered in a WebGL window</figcaption>
         </li>
         <li>
             Creating a working drawing app
@@ -159,7 +171,13 @@
                  lines and correct alignment of the brush on resized windows.
 
             </p>
+            <br>
             <!-- photo of the drawing app itself -->
+            <img src="finalprojectimages/finalimages8.png" height="400px" class="centerimg">
+            <br>
+            <figcaption> Our drawing app initially</figcaption>
+
+            
         </li>
         <li>
             Combining the 3D renderer and drawing app for cross-functionality
@@ -174,6 +192,13 @@
                 loading errors simultaneously. This problem was later fixed <a href="#problems"> as described here</a>.
             </p>
             <!-- video of the cube painting on -->
+            <br>
+            <video controls height="400px;">
+                <source src="finalprojectimages/progress2.mp4" type="video/mp4" >
+                Your browser does not support the video tag.
+            </video>
+            <br>
+            <figcaption> Progress of texturing a cube by drawing on the canvas</figcaption>
         </li>
         <li>
             Importing and exporting mesh and texture files
@@ -243,6 +268,9 @@
                   on the mesh.
 
             </p>
+            <img src="finalprojectimages/beantxt1.jpeg" height="400px" class="centerimg">
+            <br>
+            <figcaption>Texture map onto a bean mesh in our modified MeshEdit</figcaption>
             <p>
                 After consulting with Prof. Ng and conducting our own research on the best graphics API for our purposes, we 
                 stumbled across the Three.js API. This high-level framework provides a comprehensive set of tools for 
@@ -305,6 +333,16 @@
       <th>
        <img src="finalprojectimages/finalimages4.png" height = "400px">
        <figcaption class="center">Cow painting, mesh and UV map comparison</figcaption>
+      </th>
+      </tr>
+      <tr>
+        <th>
+        <img src="finalprojectimages/finalimages6.png"  height = "350px">
+        <figcaption class="center">Edited an imported texutre</figcaption>
+      </th>
+      <th>
+       <img src="finalprojectimages/finalimages7.png" height = "350px">
+       <figcaption class="center">Created my own texture</figcaption>
       </th>
       </tr>
   </table>
