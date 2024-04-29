@@ -1,0 +1,216 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <style>
+    body {
+      padding: 100px;
+      width: 1000px;
+      margin: auto;
+      text-align: center;
+      align-items: center;
+      text-align: center;
+      justify-content: center;
+      font-weight: 300;
+      font-family: 'Futura', 'Playfair Display';
+      color: #f4f4f4;
+      background-color: rgb(21, 21, 21);
+    }
+    h1, h2, h3, h4 {
+      font-family: 'Futura';
+    }
+    h2, h3, h4 {
+      color: rgb(227, 227, 227);
+      margin-top:5%;
+    }
+    img {
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+   
+    p {
+      font-family: 'Open Sans';
+      font-size: 20px;
+      color: rgb(209, 209, 209);
+    }
+    .center {
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
+    }
+    .centerimg {
+      display:block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+ 
+    code {
+      background-color: rgb(73, 73, 73);
+    }
+    figcaption {
+      font-family: 'Open Sans';
+      color: rgb(209, 209, 209);
+      font-size: 15px;
+      text-align: center;
+    }
+   
+   ol {
+    font-family: 'Open Sans';
+    color: rgb(209, 209, 209);
+   }
+   li p {
+    margin-left: 30px;
+   }
+  
+   li {
+    text-align: left;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-top: 5%;
+   }
+  th, td {
+    padding: 10px;
+  }
+  a {
+    color:white;
+  }
+  html {
+              scroll-behavior: smooth;
+          }
+  
+  </style>
+<title>CS 184 Final Project Page</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+
+<script>
+  MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']]
+    }
+  };
+</script>
+<script id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+
+</head>
+
+
+<body>
+
+<h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2024</h1>
+<h1 align="middle">Final Project: Steve Bobs MeshPainter 2.1 </h1>
+<h2 align="middle">Rebecca Feng Khai Sam, Olivia Xie, and Mahum Khan</h2>
+<p><a href="https://youtu.be/pad4RtW4Piw">Link to final video report</a></p>
+
+<h2>Abstract</h2>
+<p>
+    We developed an interactive mesh painting interface in JavaScript. Users can
+     create texture maps by painting directly onto 3D meshes in a viewer, or by 
+     painting on UV coordinates in a separate drawing application window. Additionally,
+      users can import their own meshes and texture maps, save their newly created textures,
+       and generate default meshes for painting.
+</p>
+
+<p>
+    Our platform offers a fast and simple user interface for texturing meshes, catering to quick
+    and casual needs, unlike more complex solutions such as 3D Substance Painter or Blender, 
+    used in a more professional context. We achieved this by leveraging front-end tools like 
+    the Node.js environment, the Three.js API (which provides methods for creating a WebGL viewer,
+     loading meshes, textures, raycasting, etc.), and the Canvas HTML element.
+   
+</p>
+<h2> Technical Approach</h2>
+<p>
+    We broke our project down into several subparts:
+    <ol>
+        <li>
+            Creating a WebGL 3D mesh renderer that can handle texture mapping
+        </li>
+        <li>
+            Creating a working drawing app
+
+        </li>
+        <li>
+            Combining the 3D renderer and drawing app for cross-functionality
+
+        </li>
+        <li>
+            Importing and exporting mesh and texture files
+
+        </li>
+        <li>
+            Implement raycasting in order to draw onto the mesh
+            <p>
+                This was one of the more challenging parts of the project. Upon researching
+                 techniques on how to paint over meshes, we stumbled across a few resources.
+                  <a href="https://tomtung.github.io/chameleon.js/">This demo </a> takes inspiration
+                   from the <a href="http://www-ui.is.s.u-tokyo.ac.jp/~takeo/papers/i3dg2001.pdf">following paper</a>.
+                    It dynamically creates and unwraps the UVs of a mesh so that painting
+                   on the mesh is fast and efficient as opposed to drawing over a mesh that is already
+                    UV unwrapped and static. However, the paper states that the limitations of this 
+                    program can only be used to paint on meshes casually rather than for animated 
+                    film or game assets, which require carefully-placed UVs from the start for texture
+                     mapping and skinning. Thus, we decided to base our implementation by drawing on a 
+                     static UV unwrapped mesh, because we wanted our program to mirror other professional 
+                     3D paint programs and teach others how UV mapping works.
+
+            </p>
+            <p>
+                The diagram below illustrates how we ended up implementing drawing directly onto
+                 the mesh via raycasting. ThreeJS has its own raycaster class, and handles intersections
+                  with faces on a mesh. Upon calling the intersect method, we can directly obtain the face
+                   in which the mouse intersected, and its corresponding interpolated UV coordinates.
+                    Once the UV coordinates are obtained, we can calculate their position on the drawing 
+                    app by scaling with the corresponding width and height of the canvas. We scale (1-v) 
+                    by the height instead of v because ThreeJS reads the top left UV coordinate as (0,0).
+
+            </p>
+            <img src="finalprojectimages/finalimages5.jpeg" width="700px" class="centerimg ">
+            <figcaption >Our raycasting implementation on the banana mesh, a visualization</figcaption>
+        </li>
+    </ol>
+</p>
+
+<h2>Results</h2>
+
+<h2>References</h2>
+<ul>
+    <li>
+        <a href="https://threejs.org/docs/index.html#manual/en/introduction/Creating-a-scene">
+            ThreeJS Documentation
+        </a></li>
+    <li><a href="https://threejs.org/docs/#manual/en/introduction/Installation
+        ">
+        ThreeJS Getting Started
+    </a></li>
+    <li><a href=" https://www.youtube.com/watch?v=YK1Sw_hnm58" >
+        Learn Three.js from Scratch: Crash Course Tutorial
+    </a></li>
+    <li><a href="ttps://www.youtube.com/watch?v=y84tBZo8GFo
+        ">
+        Build A Drawing or Paint App in HTML CSS & JavaScript | Drawing App in JavaScript
+    </a></li>
+    <li><a href="">
+
+    </a></li>
+     <li><a href="">
+
+    </a></li>
+    <li><a href="" >
+
+    </a></li>
+    <li><a href="">
+
+    </a></li>
+    <li><a href="">
+        
+    </a></li>
+</ul>
+</body>
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+</html>
