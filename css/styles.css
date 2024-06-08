@@ -23,7 +23,7 @@ body {
     display: flex;
     height: 100vh;
     background-size:cover;
-    background-image: url("../webimahes/background.png");
+    background-image: url("../images/webimahes/background.png");
     text-align: center;
     justify-content: center;
    

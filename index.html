@@ -7,7 +7,7 @@
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-        <link rel="stylesheet" href="css/styles.css">
+        <link rel="stylesheet" href="css/about.css">
         <link rel="stylesheet" href="css/animation.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/octicons/12.1.0/font/octicons.min.css">
     </head>
@@ -30,10 +30,10 @@
                                 </svg>
                             </a> 
                             <a href="https://www.linkedin.com/in/rebecca-feng-2556781b6/">
-                                <img src="webimahes/linkedin.png" class="social linkedin">
+                                <img src="images/webimahes/linkedin.png" class="social linkedin">
                             </a>
                             <a href="https://sylphanru.itch.io">
-                                <img src="webimahes/itchio.png" class="social itchio">
+                                <img src="images/webimahes/itchio.png" class="social itchio">
                             </a>
                         </div>
                     </div>
@@ -58,72 +58,78 @@
                     <ul class="dropdown">
                         <li><a href="subpages/twasanight.html">twas a night (2023)</a></li>
                         <li><a href="subpages/games.html">home for anderson (2023)</a></li>
-                        <li><a href="subpages/3dstudies.html">studies</a></li>
+                        <li><a href="subpages/3dstudies.html">other</a></li>
                     </ul>
                 </li>
                 <li>
-                        2d
-                    <ul class="dropdown">
-                    <li><a href="subpages/astroclub.html">astro club</a></li>
-                        <li><a href="subpages/pleinair.html">plein-air</a></li>
-                    </ul>
+                     <a href="subpages/art.html">  2d </a> 
+                    
                 </li>
                 <li>
-                    <a href="about.html">
+                    <a href="index.html" style="color:black">
                         about
                     </a>
                 </li>
                 </ul>
-                
-
              </div>
-             
             </div>
-           
         </div>
-        <div class="main">
-            <div class="image-container">
-                <a href="about.html">
-                    <img src="webimahes/profile.PNG" id="profilepic" alt="Hello! My name is Rebecca Feng!">
-                </a>
-                <a href="subpages/code.html#PathTracer">
-                    <img src="webimahes/raytracer.png" alt=""  id="pic5">
-                    </a>
-                <a href="subpages/code.html#meshedit">
-                    <img src="webimahes/meshedit.png" alt=""  id="pic1" >
-                </a>
-               
-                    <a href="subpages/code.html#Clothsimulator">
-                        <img src="webimahes/clothsim.png" alt=""  id="pic1">
+        <div class="main" style="text-align:center">
+            <div class="row">
+                <div class="col">
+                    <div class="image-container" style="justify-content: center;">
+                        <img src="images/webimahes/cat.png" class="hidden" id="catpic" alt="cat" >
+                        <img src="images/webimahes/clickme.png" class="hidden" id="clickme">
+                        <a href="moomin.html">
+                            <img src="images/webimahes/profile.PNG" id="profilepic" alt="Hello! My name is Rebecca Feng!">    
                         </a>
-                <a href="subpages/twasanight.html">
-                    <img src="webimahes/henrynamelia.png" alt=""  id="pic5" >
-                </a>
-                <a href="subpages/code.html#mayascript">
-                <img src="webimahes/mirrorscript.png" alt=""  id="pic2">
-                </a>
-                <a href="subpages/code.html#svgrasterizer">
-                    <img src="webimahes/cs184hw1.png" alt=""  id="pic6" >
-                </a>
-                <a href="subpages/games.html">
-                    <img src="webimahes/homeforanderson.png" alt="" id="pic1" >
-                </a>
-               
-                
-                <a href="subpages/astroclub.html">
-                    <img src="webimahes/astroclub.png" alt=""  id="pic4" >
-                </a>
-
-               
-            </div>
-            
-            <div class="quicklinks">
-                <a href="about.html"><button><h3>about</h3></button></a> 
-                <a href="RFengResume.pdf"><button><h3>resume</h3></button></a> 
-                <a href="transcriptspring2024.pdf"><button><h3>transcript</h3></button></a> 
-                
-
+                        
+                        <img src="images/webimahes/rebeccafeng.png" id="actualpic" alt="a pic of me">
+                        
+                    </div>
+                    <h4 style="font-family: Playfair Display;">hello!</h4>
+                    <p>I'm Rebecca Feng, and my interests lie in the intersections between art, storytelling, and technology. 
+                        More specifically, I'm interested in computer graphics and how we utilize it to tell stories through modern media.
+                    </p>
+                    <p>
+                        This summer, I am partaking in undergraduate research with <a href="https://docs.nerf.studio">Nerfstudio</a> at the Berkeley Artificial Intelligence Research
+                        Labs contributing to their open-source codebase, and will be a student volunteer at the 2024 ACM SIGGRAPH. I am also an assistant student instructor for Berkeley's Introduction to Astronomy course, and will
+                        be taking a Partial Differential Equations course in July.
+                    </p>
+                    <p>I also love matcha, watching animated films, and <button id="thenephew">my nephew</button>.
+                    </p>   
+                    <p id="ucberkeley2025"><em>UC Berkeley 2025 Astrophysics, Computer Science B.A.</em></p>
+                    <div class="socials">
+                        <a href="https://github.com/beckyfeng08" class="icon fa-github">
+                            <svg class="social octicon octicon-mark-github" viewBox="0 0 16 16" width="30" height="30" aria-hidden="true" >
+                                <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38C13.71 14.53 16 11.53 16 8c0-4.42-3.58-8-8-8z"/>
+                            </svg>
+                        </a> 
+                        <a href="https://www.linkedin.com/in/rebecca-feng-2556781b6/">
+                            <img src="images/webimahes/linkedin.png" class="social linkedin">
+                        </a>
+                        <a href="https://sylphanru.itch.io">
+                            <img src="images/webimahes/itchio.png" class="social itchio">
+                        </a>
+                    </div>
+                    <br>
+                    <div>
+                        <button>
+                            <a href="pdfs/RfengResume.pdf">
+                                    resume 
+                            </a>
+                        </button>
+                        <button>
+                            <a href="pdfs/transcriptspring2024.pdf">
+                                transcript 
+                            </a>
+                        </button>
+                    </div>
+                   
+                    
+                </div>
             </div>
         </div>
+        <script src="scripts/fade.js"></script>
     </body>
 </html>

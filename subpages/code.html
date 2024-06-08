@@ -20,9 +20,9 @@
                 <div class="col-5">
                     <div class="row" style="text-align:left">
                     
-                    <a href="../index.html" style="text-decoration: none; color: black;">
-                        <h1 style=" font-size: 20px; ">rebecca feng</h1>
-                    </a>
+                        <a href="../index.html" style="text-decoration: none; color: black;">
+                            <h1 style=" font-size: 20px; ">rebecca feng</h1>
+                        </a>
                         <div class="socials">
                             <a href="https://github.com/beckyfeng08" class="icon fa-github">
                                 <svg class="social octicon octicon-mark-github" viewBox="0 0 16 16" width="20" height="20" aria-hidden="true" >
@@ -30,59 +30,85 @@
                                 </svg>
                             </a> 
                             <a href="https://www.linkedin.com/in/rebecca-feng-2556781b6/">
-                                <img src="../webimahes/linkedin.png" class="social linkedin">
+                                <img src="../images/webimahes/linkedin.png" class="social linkedin">
                             </a>
                             <a href="https://sylphanru.itch.io">
-                                <img src="../webimahes/itchio.png" class="social itchio">
+                                <img src="../images/webimahes/itchio.png" class="social itchio">
                             </a>
                         </div>
                     </div>
                     <div class="row">
                         <em> 
-                         <p style="font-family: Futura; font-size:10px; color:gray;"> 
-                             <a href="mailto:beckyfeng08@berkeley.edu?"  style="text-decoration: none; color: gray;">beckyfeng08@berkeley.edu</a> | computer graphics + 3D + illustration
-                         </p>
-                     </em>
-                     </div>
-             </div>
-             <div class="col" >
-                <ul class="menubar">
-                   
-                <li>
-                    <a href="code.html" style="color:black">
-                        code
-                    </a>
-                </li>
-                <li>
-                        3d
-                    <ul class="dropdown">
-                        <li><a href="twasanight.html">twas a night (2023)</a></li>
-                        <li><a href="games.html">home for anderson (2023)</a></li>
-                        <li><a href="3dstudies.html">studies</a></li>
-                    </ul>
-                </li>
-                <li>
-                        2d
-                    <ul class="dropdown">
-                    <li><a href="astroclub.html">astro club</a></li>
-                        <li><a href="pleinair.html">plein-air</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="../about.html">
-                        about
-                    </a>
-                </li>
-                </ul>
-             </div>
+                            <p style="font-family: Futura; font-size:10px; color:gray;"> 
+                                <a href="mailto:beckyfeng08@berkeley.edu?"  style="text-decoration: none; color: gray;">beckyfeng08@berkeley.edu</a> | computer graphics + 3D + illustration
+                            </p>
+                        </em>
+                    </div>
+                </div>
+                <div class="col" >
+                    <ul class="menubar">
+            
+                        <li>
+                            <a href="code.html">
+                                code
+                            </a>
+                        </li>
+                        <li>
+                                3d
+                            <ul class="dropdown">
+                                <li><a href="twasanight.html">twas a night (2023)</a></li>
+                                <li><a href="games.html">home for anderson (2023)</a></li>
+                                <li><a href="3dstudies.html">studies</a></li>
+                            </ul>
+                        </li>
+                        <li style="color:black">
+                            <a href="art.html">
+                                2d
+                            </a>  
+                            
+                        </li>
+                        <li>
+                            <a href="../index.html">
+                                about
+                            </a>
+                        </li>
+                        </ul>
+
+                </div>
+    
             </div>
         </div>
 
         <div class="main">
-            <section id="title">
+            <section id="title"></section>
                 <h4>code</h4>
                 <p>projects I programmed.</p>
                 <hr>
+            
+            <section id="stevebobs">
+                <div style="justify-content: center; text-align: center; margin:50px;">
+                    <h5>Steve Bobs Mesh Painter 2.1 (2024)</h5>
+                    <p>Created an interactive app where users can paint directly on a meshed object
+                        or onto its texture map (similar to Adobe Substance Painter 3D). Users can
+                        optionally import and export texture maps. I implemented raycasting for 
+                        drawing directly on the mesh, the WebGL mesh display engine and interactability,
+                        several UI elements, and general debugging. Project written using Javascript
+                        and the Three.JS library.
+                    </p>
+                    <p>
+                        Won Showcase Winner out of 80 other projects in the <a href="https://cs184.eecs.berkeley.edu/sp24/docs/final_showcase">CS 184 Final Project Showcase</a>.
+                    </p>
+                    <p><a href="cs184/finalproject/finalprojectpage.html"> See the project page here! </a></p>
+                    <div >
+                        <div  style="justify-content: center; text-align: center">
+                            <img src="cs184/finalproject/finalprojectimages/fposter.mp4" style="padding:12px;" height="400px"/>
+                        </div>
+                     
+                      
+                      </div>
+                    
+                    </div>
+            </section>
             </section>
             <section id="PathTracer">
                 <div style="justify-content: center; text-align: center; margin:50px;">
@@ -90,7 +116,7 @@
                     <p>Created a physics-based pathtracer that can render diffuse and conductive materials.
                         Implemented various techniques and concepts in pathtracing such as ray intersection with primitives, 
                         bounding volume hierarchies, Monte Carlo estimators, direct illumination, global illumination, and 
-                        adaptive sampling.
+                        adaptive sampling. Additionally, I implemented support for rendering microfacet BRDFs.
                         Project written in C++. 
                     </p>
                     <p><a href="cs184/hw3/raytracer.html"> See the project page here! </a></p>
