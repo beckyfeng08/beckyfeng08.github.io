@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="../cs180.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+        
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async=async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+    </script>
+    </head>
+
+    <body>
+
+        <h1 align="middle">Project 4: Stitching and Mosaicking</h1>
+        <h2 align="middle">CS 180: Computer Vision and Computational Photography, Fall 2024</h1>
+        <h2 align="middle">Rebecca Feng</h2>
+        <div align="middle">
+            <img src="images/pt4/results/campbellwarped.png"  height="400">
+            <table>
+                <tr>
+                    <td>
+                        <img src="images/pt4/inputs/campbell/campbell1.png"  height="150">
+
+                    </td>
+                    <td>
+                        <img src="images/pt4/inputs/campbell/campbell2.png"  height="150">
+
+                    </td>
+                    <td>
+                        <img src="images/pt4/inputs/campbell/campbell3.png"  height="150">
+
+                    </td>
+                    <td>
+                        <img src="images/pt4/inputs/campbell/campbell4.png"  height="150">
+
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <br>
+        <h2 align="middle">
+            Part A: Image Warping and Mosaicing
+        </h2>
+        
+        <h3 align="middle">
+            Recovering Homographies
+        </h3>
+
+        <div align="middle">
+            <p>
+                We need to define a homography matrix H in order to warp the perspective of 
+                a given image. This is done by manually defining four correspondence points in our original
+                image, then an associating four corrrespondence points in the desired warped image. 
+
+                The homography matrix has 8 free variables. For 2D images, the
+                homography matrix is a 3 by 3 matrix where:
+            </p>
+            <div class="mathjax" align="middle">
+                \[
+                    \begin{bmatrix}
+                    a & b & c \\
+                    d & e & f \\
+                    g & h & 1
+                    \end{bmatrix}
+                \]
+            </div>
+            <p>
+                and the free variables are given from letters a to h. Mathematically, we would like
+                to apply H to a given coordinate in our original image, (x,y), to a coordinate in 
+                our final image, (x', y') , where:
+            </p>
+            <div class="mathjax" align="middle">
+                \[
+                    \begin{bmatrix}
+                    a & b & c \\
+                    d & e & f \\
+                    g & h & 1
+                    \end{bmatrix} 
+                    \begin{bmatrix}
+                    x \\
+                    y \\
+                    1
+                    \end{bmatrix}
+                    =
+                    \begin{bmatrix}
+                    w*x' \\
+                    w*y' \\
+                    w
+                    \end{bmatrix}
+                \]
+                \[
+                    w = gx + hy + 1
+                \]
+            </div>
+            <p>
+                Expressing free variables a through h as a vector, 
+            </p>
+            <div class="mathjax" align="middle">
+                \begin{align*}
+                &\begin{cases}
+                ax + by + c = wx' \\
+                dx + ey + f = wy' \\
+                gx + hy + 1 = w
+                \end{cases}
+                \\
+                \implies
+                &\begin{cases}
+                ax + by + c = (gx + hy + 1) x' \\
+                dx + ey + f = (gx + hy + 1) y'
+                \end{cases}
+                \\
+                \implies
+                &\begin{cases}
+                ax + by + c - gxx' - hyx' = x' \\
+                dx + ey + f - gxy' - hyy' = y'
+                \end{cases}
+                \\
+                \implies
+                &\begin{bmatrix}
+                x & y & 1 & 0 & 0 & 0 & -xx' & -yx' \\
+                0 & 0 & 0 & x & y & 1 & -xy' & -yy' \\
+                \end{bmatrix}
+                \begin{bmatrix} a \\ b \\ c \\ d \\ e \\ f \\ g \\ h \end{bmatrix}
+                =
+                \begin{bmatrix} x' \\ y' \end{bmatrix}
+                \end{align*}
+            </div>
+
+            <p>
+                We can solve for what variables a through h are, if we have four correspondence points;
+                We can stack those correspondence points on the right hand matrix representing the coordinate
+                buffer. The matrix is invertible, and we can uniquely define variables a through h if the 
+                right hand buffer is a square matrix (8 by 8). We can also define more correspondence points
+                as needed, and perform least-squares to determine the best a through h values.
+            </p>
+
+            <p>
+                For least squares, we have an n by 8 right hand side matrix A (where n is 2 times number of
+                correspondence points to account for the x and y coordinates), and a resulting vector B with
+                dimensions n by 1, representing the transformed coordinates. We can solve for the vector
+                representing H's free variables a through h, denoted as H', as follows:
+            </p>
+            <div class="mathjax" align="middle">
+                \begin{align*}
+                \\
+                AH' = B
+                \\
+                \implies
+                A^{-1}AH' = A^{-1}B
+                \\
+                \implies
+                H' = A^{-1}B
+                
+                \end{align*}
+            </div>
+            <p>
+                And determine the parameters of H this way.
+            </p>
+        </div>
+       
+        <h3 align="middle">
+            Image Rectification and Warping
+        </h3>
+        <div align="middle">
+            <p>
+                We can apply H to the corners of our image and warp the entire image 
+                to the new perspective grid. Once we get the positions of the 
+                corners of our warped image, we then come up with an inverse H in order to
+                sample points from our original image, using a bilinear interpolation sampling
+                method in order to ensure antialiasing (speciially, <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html">scipy's griddata</a>).
+            </p>
+            <p>
+                If, upon applying H to the corners of our original image, the warped image's
+                corners have negative values, then we would have to shift the image up, so that the 
+                top left corner rests at image coordinates (0,0).
+            </p>
+            <p>
+                Here are some results of warping each image to a new perspective grid, so that 
+                it would appear to the viewer that we are looking face-on at something in the image.
+                 I drew the temple a while back!
+            </p>
+            <table>
+                <tr>
+                    <td>
+                        <img src="images/pt3/results/siggraphwarped.jpeg" alt="" width="300px">
+                        <figcaption>
+                            Warped SIGGRAPH picture
+                        </figcaption>
+                    </td>
+                    <td>
+                        <img src="images/pt3/results/siggraphwarpedcoppred.jpeg" alt="" width="300px">
+                        <figcaption>
+                            Warped SIGGRAPH picture, cropped
+                        </figcaption>
+                    </td>
+                    
+                    <td>
+                        <img src="images/pt3/inputs/siggraph.jpeg" alt="" width="300px">
+                        <figcaption>
+                            Original SIGGRAPH picture
+                        </figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <img src="images/pt3/results/templewarped_1.jpeg" alt="" width="300px">
+                        <figcaption>
+                            Warped temple drawing, front side
+                        </figcaption>
+                    </td>
+                    <td>
+                        <img src="images/pt3/results/templewarped_2.jpeg" alt="" width="300px">
+                        <figcaption>
+                            Warped temple drawing, right side
+                        </figcaption>
+                    </td>
+                    <td>
+                        <img src="images/pt3/inputs/temple.jpeg" alt="" width="300px">
+                        <figcaption>
+                            Original temple picture
+                        </figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <h3 align="middle">
+            Image mosaicking
+        </h3>
+        <div align="middle">
+            <p>
+                We can apply the previous idea multiple times to different
+                images to warp each image's correspondence points to another
+                image's correspondence points. For example, we can define common correspondence
+                points at the corners of the blackboard in order to stack each warped image in
+                the set of images, one-by-one.
+            </p>
+            <p>
+                In my implementation, I warped each image on top of another one by one. Image 2's 
+                was warped onto Image 1 by finding H transforming Image 2's correspondence points to Image 1's
+                correspondence points. Then, we can stack together the images and blend them using a distance
+                mask, and multi-band pass filtering described in <a href="../proj2/proj2.html">project 2</a>.
+                Then, I warp Image 3's correspondence points onto Image 1 and 2's correspondence points (which
+                should be in the same position as before, but shifted due to resizing the image when merging
+                the warped image with the original), and so on.
+            </p>
+            <p>
+                For multiresolution blending, we must input the two images in their respective positons in
+                the final image buffer, and a mask to blend the two images together.
+                In order to compute the mask, we need to determine a good line between the two images
+                intersecting each other.
+
+                For each image, we can first apply a <a href="https://www.mathworks.com/help/images/ref/bwdist.html">bwdist</a> 
+                filter. The Python equivalent of this is <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.distance_transform_edt.html">
+                    scipy's Euclidean distance transform method.
+                </a>
+                Afterwards, we compare the two image buffers to see at which positions in the array that the 
+                1st image has a higher bwdist value than the second image. In other words,
+
+                <code>image1bwdist > image2bwdist</code> gives us a boolean buffer that we can convert to 
+                a float buffer (for computation), where a particular pixel given a coordinate in the image 
+                buffer is black if image1's bwdist at that coordinate has a higher pixel value than image2's
+                bwdist.
+            </p>
+            <p>
+                The float buffer will be the mask that we will pass into the multiresolution blending function,
+                in order to blend our two images together.
+            </p>
+            <p>
+                Here are some results, as well as the input images:
+            </p>
+
+          <!-- final mosaicked results -->
+            <table>
+                <tr>
+                      <!-- campbell hall -->
+                    <td>
+                        <img src="images/pt4/results/campbellwarped.png" alt="" width="300px">
+                    </td>
+
+                    <!-- flowers -->
+                    <td>
+                        <img src="images/pt4/results/flowers.png" alt="" width="300px">
+                    </td>
+                      <!-- joe -->
+                    <td>
+                        <img src="images/pt4/results/joewarped.png" alt="" width="300px">
+                    </td>
+                </tr>
+            </table>
+            <!-- input images -->
+            <!-- campbell -->
+            <h4>
+            Campbell hall
+            </h4>
+            <table>
+                <tr>
+                    <td>
+                        <img src="images/pt4/inputs/campbell/campbell1.png" alt="" width="200px">
+                    </td>
+                    <td>
+                        <img src="images/pt4/inputs/campbell/campbell2.png" alt="" width="200px">
+                    </td>
+                    <td>
+                        <img src="images/pt4/inputs/campbell/campbell3.png" alt="" width="200px">
+                    </td>
+                    <td>
+                        <img src="images/pt4/inputs/campbell/campbell4.png" alt="" width="200px">
+                    </td>
+                </tr>
+             </table>
+
+              <!-- flowers -->
+              <h4>
+                Flowers on my desk
+              </h4>
+             <table>
+                <tr>
+                    <td>
+                        <img src="images/pt4/inputs/flowers/flower1.png" alt="" width="200px">
+                    </td>
+                    <td>
+                        <img src="images/pt4/inputs/flowers/flower2.png" alt="" width="200px">
+                    </td>
+                    <td>
+                        <img src="images/pt4/inputs/flowers/flower3.png" alt="" width="200px">
+                    </td>
+                </tr>
+             </table>
+
+             <!-- Joe -->
+             <h4>
+                Joe
+              </h4>
+             <table>
+                <tr>
+                    <td>
+                        <img src="images/pt4/inputs/joe/joe2.png" alt="" width="300px">
+                    </td>
+                    <td>
+                        <img src="images/pt4/inputs/joe/joe1.png" alt="" width="300px">
+                    </td>
+                   
+                </tr>
+             </table>
+             <p>
+                There are some slight artifacting issues due to the camera being slightly out of
+                position when taking photos, as well as different levels of automatic exposure and lighting
+                when taking photos at various angles. Multiresolution blending helped greatly with 
+                blending two images with different lighting conditions. Additionally, the slight black, blurred
+                border in the mosaicked images are a byproduct of the laplacian and gaussian stacking, and that
+                pixel values outside of the warped image in the final image buffer are black. I used a 
+                blur factor as small as possible to minimize the noticeability of the black borders, but 
+                large enough to seamlessly blend two warped images together in the colored portions.
+             </p>
+        </div>
+        
+        <h3 align="middle">
+            Bells and Whistles
+        </h3>
+        <div align="middle">
+            <p>
+                Here are some creative results! I computed the H needed to warp the drawing
+                onto the blackboard, and overlayed the two images together:
+            </p>
+
+            <img src="images/bellwhistle/results/campbellcar.png" alt="" width="600px">
+            
+            <table>
+               
+                <tr>
+                    <td>
+                        <img src="images/bellwhistle/inputs/campbell3.png" alt="" width="300px">
+
+                    </td>
+                    <td>
+                        <img src="images/bellwhistle/inputs/sf1.png" alt="" width="300px">
+
+                    </td>
+                    <td>
+                        <img src="images/bellwhistle/results/sfwarped.png" alt="" width="300px">
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </body>
+</html>
