@@ -27,7 +27,7 @@
         <h2 align="middle">CS 180: Computer Vision and Computational Photography, Fall 2024</h1>
         <h2 align="middle">Rebecca Feng</h2>
         <div align="middle">
-            <img src="images/parta/8/dogmanhat.png"  height="200">
+            <img src="images/parta/bellsnwhistles/courselogo.png" alt="">
         </div>
         <br>
 
@@ -1298,6 +1298,52 @@
     <h2 align="middle">
         Bells and Whistles
     </h2>
+    <h3 align="middle">
+        Course logo
+    </h3>
+    <div align="middle">
+        <p>
+            Here are two variations on a course logo by feeding in a drawn version of the
+        iconic "orapple" into the image-to-image translation, then
+        using the stage 2 unet to upsample the image. I also made references
+        to our facial triangulation project as well!
+        </p>
+         <img src="images/parta/bellsnwhistles/courselogo.png" alt="">
+         <br>
+         <img src="images/parta/bellsnwhistles/courselogo2.png" alt="">
+
+    </div>
+    <h3 align="middle">
+        Artistic results
+    </h3>
+    <div align="middle">
+        <p>
+            I took one of my drawings and fed it into the image-to-image 
+        translation as well to see what it outputs with <code>i_start=20</code>.
+        Didn't get any dogs back though.
+        </p>
+        <img src="images/parta/bellsnwhistles/doggie.PNG" alt="" width="300px">
+
+        <figcaption>The original image</figcaption>
+        <table>
+            <tr>
+                <td>
+                    <img src="images/parta/bellsnwhistles/gen1.PNG" alt="" width="200px">
+                </td>
+                <td>
+                    <img src="images/parta/bellsnwhistles/gen2.PNG" alt="" width="200px">
+                </td>
+                <td>
+                    <img src="images/parta/bellsnwhistles/gen3.PNG" alt="" width="200px">
+                </td>
+            </tr>
+        </table>
+        <figcaption>Image to image translation with <code>i_start=20</code></figcaption>
+    </div>
+
+    <h3 align="middle">
+        Gif of denoising
+    </h3>
     <div align="center">
         <p>
             A gif of denoising a class-conditioned sample every 30 timesteps. Hover over:
