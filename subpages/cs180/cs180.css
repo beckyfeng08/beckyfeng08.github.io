@@ -7,13 +7,25 @@ body {
     font-family: 'Open Sans', sans-serif;
     color: #121212;
     }
-    h1, h2, h3, h4 {
-        font-family: 'Source Sans Pro', sans-serif;
-      }
-    figcaption {
-      margin-bottom: 2.5%;
-    }
-    img {
-      margin-top: 1.25%;
-      margin-top: 1.25%;
-    }
+h1, h2, h3, h4 {
+    font-family: 'Source Sans Pro', sans-serif;
+  }
+figcaption {
+  margin-bottom: 2.5%;
+}
+img {
+  margin-top: 1.25%;
+  margin-top: 1.25%;
+}
+.hover-gif1 {
+  width: 300px; /* Adjust width */
+  height: 200px; /* Adjust height */
+  background-image: url('proj5/images/partb/2.5/5epochs.png'); /* Static image here */
+  background-size: cover;
+  background-position: center;
+  transition: background-image 0.3s ease;
+}
+
+.hover-gif1:hover {
+  background-image: url('proj5/images/partb/bellsnwhistles/class_conditional_diffusion5epochs.gif'); /* Animated GIF here */
+}

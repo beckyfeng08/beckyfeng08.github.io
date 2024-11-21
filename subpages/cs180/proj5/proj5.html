@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="../cs180.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+        
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async=async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+    </script>
+    </head>
+
+    <body>
+
+        <h1 align="middle">Project 5: Fun with Diffusion Models</h1>
+        <h2 align="middle">CS 180: Computer Vision and Computational Photography, Fall 2024</h1>
+        <h2 align="middle">Rebecca Feng</h2>
+        <div align="middle">
+            <img src="images/parta/8/dogmanhat.png"  height="200">
+        </div>
+        <br>
+
+        <!-- Beginning of Part A -->
+
+        <h2 align="middle">
+            Part A: The Power of Diffusion Models!
+        </h2>
+        
+        <h3 align="middle">
+            1. The Forward Process
+        </h3>
+
+        <div align="middle">
+            <p>
+                The forward process in diffusion models consists of taking an image, and adding noise to it.
+                The resulting noised image at timestep t, denoted as x_t, is given by the equation
+            </p>
+            <div class="mathjax" align="middle">
+               \[ x_t = \sqrt{\bar\alpha_t} x_0 + \sqrt{1 - \bar\alpha_t} \epsilon
+          \quad \text{where}~ \epsilon \sim N(0, 1) \tag{A.2}\]
+            </div>
+            <p>
+                t has values ranging from 0 and T. When t=0, we should yield a 
+                clean image. When t=T, the image should be maximally noised. The noise
+                in the image is sampled in a normal distribution. Here are the results of
+                the noised test images at timesteps t = 250, 500, and 750:
+            </p>
+            <table>
+                <tr>
+                    <td>
+                        <img src="images/parta/original/campanile.png" alt="" width="200px">
+                    </td>
+                    <td>
+                        <img src="images/parta/1/250.png" alt="" width="200px">
+                    </td>
+                    <td>
+                        <img src="images/parta/1/500.png" alt="" width="200px">
+                    </td>
+                    <td>
+                        <img src="images/parta/1/750.png" alt="" width="200px">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <figcaption align="middle">
+                            t=0 (Original image)
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            t=250
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            t=500
+                        </figcaption>
+                    </td>
+
+                    <td>
+                        <figcaption align="middle">
+                            t=750
+                        </figcaption>
+                    </td>
+                </tr>
+            </table>
+
+        </div>
+
+        <h3 align="middle">
+            2. Classical Denoising
+        </h3>
+
+        <div align="middle">
+            <p>
+                Now let's try denoising these images. We can attempt
+                to do so by simply doing a Gaussian blur, with
+                a kernel size of (7,7). However, we find
+                that the noisier an image is, the less quality the result:
+            </p>
+            <table>
+                <tr>
+                    <td>
+                        <img src="images/parta/1/250.png" alt="" width="200px">
+                    </td>
+                    <td>
+                        <img src="images/parta/1/500.png" alt="" width="200px">
+                    </td>
+                    <td>
+                        <img src="images/parta/1/750.png" alt="" width="200px">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <figcaption align="middle">
+                            Noised t=250
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            Noised t=500
+                        </figcaption>
+                    </td>
+
+                    <td>
+                        <figcaption align="middle">
+                            Noised t=750
+                        </figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <img src="images/parta/2/250.png" alt="" width="200px">
+                    </td>
+                    <td>
+                        <img src="images/parta/2/500.png" alt="" width="200px">
+                    </td>
+                    <td>
+                        <img src="images/parta/2/750.png" alt="" width="200px">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <figcaption align="middle">
+                            Blurred t=250
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            Blurred t=500
+                        </figcaption>
+                    </td>
+
+                    <td>
+                        <figcaption align="middle">
+                            Blurred t=750
+                        </figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <h3 align="middle">
+            3. One-Step Denoising
+        </h3>
+
+        <div align="middle">
+            <p>
+                We use a pretrained diffusion model to attempt to denoise our 
+                input noised image in one step, with the prompt <code>"a high quality photo"</code>. That is, we try to remove the
+                noise all at once. We use the given unet to predict the noise
+                in the image, and subtract the noise from our current noised image,
+                in order to get a denoised one. Here are the results for denoising 
+                an image at varying noise levels.
+            </p>
+            <table>
+                <tr>
+                    <td>
+                        <img src="images/parta/3/250.png" alt="" width="200px">
+                    </td>
+                    <td>
+                        <img src="images/parta/3/500.png" alt="" width="200px">
+                    </td>
+                    <td>
+                        <img src="images/parta/3/750.png" alt="" width="200px">
+                    </td>
+                </tr>
+                <tr>
+                   
+                    <td>
+                        <figcaption align="middle">
+                            Denoised t=250
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            Denoised t=500
+                        </figcaption>
+                    </td>
+
+                    <td>
+                        <figcaption align="middle">
+                            Denoised t=750
+                        </figcaption>
+                    </td>
+                </tr>
+            </table>
+            <p>
+                Notice how increased levels in noise
+                make it harder to predict the original image passed in.
+                 This makes sense because as an image gets noisier, it is
+                 less clear what details are in the original image, so we
+                 pull some assumptions about what details might be included
+                 in the original image.
+            </p>
+        </div>
+
+        <h3 align="middle">
+            4. Iterative Denoising
+        </h3>
+
+        <div align="middle">
+            <p>
+                We can improve our results above by denoising our noised image
+                step by step, removing a little bit of noise each time in the 
+                direction of our prompt. We create a list of timesteps from
+                t = 0 to t = 1000. However, having to denoise an image one step 
+                at a time, totaling up to 1000 steps, can be computationally expensive.
+                Instead, we can skip a few timesteps in each iteration. We keep
+                track of these skipped timesteps through an array we define as 
+                <code>strided_timesteps</code>, consisting of only every 30th 
+                timestep.
+            </p>
+            <p>
+                The equation to estimate our less noisy image is
+            </p>
+            <div class="mathjax" align="center">
+                \[
+                x_{t'} = \frac{\sqrt{\bar\alpha_{t'}}\beta_t}{1 - \bar\alpha_t} x_0 +
+        \frac{\sqrt{\alpha_t}(1 - \bar\alpha_{t'})}{1 - \bar\alpha_t} x_t +
+        v_\sigma\tag{A.3}
+                \]
+            </div>
+            <p>
+                where t' is the next strided timestep leading to a less noisy image, t is our 
+                current timestep, x_0 is the current estimate of the original image (predicted
+                in 3), and the alphas are noise coefficients at their respective
+                timesteps. The v_sigma is also some predicted noise.
+            </p>
+            <p>
+                We show the process of a noised image being iteratively denoised,
+                resulting in a final, less noised, predicted result:
+            </p>
+            <table>
+                <tr>
+                    <td>
+                        <img src="images/parta/4/i_10.png" alt="" width="200px">
+                    </td>
+                    <td>
+                        <img src="images/parta/4/i_15.png" alt="" width="200px">
+                    </td>
+                    <td>
+                        <img src="images/parta/4/i_20.png" alt="" width="200px">
+                    </td>
+                    <td>
+                        <img src="images/parta/4/i_25.png" alt="" width="200px">
+                    </td>
+                    <td>
+                        <img src="images/parta/4/i_30.png" alt="" width="200px">
+                    </td>
+                </tr>
+                <tr>
+                   
+                    <td>
+                        <figcaption align="middle">
+                            Noisy Campanile at t=690
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            Noisy Campanile at t=540
+                        </figcaption>
+                    </td>
+
+                    <td>
+                        <figcaption align="middle">
+                            Noisy Campanile at t=390
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            Noisy Campanile at t=240
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            Noisy Campanile at t=90
+                        </figcaption>
+                    </td>
+
+                </tr>
+            </table>
+        </div>
+
+        <h3 align="middle">
+            5. Diffusion Model Sampling
+        </h3>
+
+        <div align="middle">
+            <p>
+                With our trained model, we attempt to generate random images of our own now
+                by passing in random noise, and seeing what the model outputs based upon our
+                prompt, <code>a high quality photo</code>. Here are some results: 
+            </p>
+            <table>
+                <tr>
+                    <td>
+                        <img src="images/parta/5/1.png" alt="" width="200px">
+                    </td>
+                    <td>
+                        <img src="images/parta/5/2.png" alt="" width="200px">
+                    </td>
+                    <td>
+                        <img src="images/parta/5/3.png" alt="" width="200px">
+                    </td>
+                    <td>
+                        <img src="images/parta/5/4.png" alt="" width="200px">
+                    </td>
+                    <td>
+                        <img src="images/parta/5/5.png" alt="" width="200px">
+                    </td>
+                </tr>
+                <tr>
+                   
+                    <td>
+                        <figcaption align="middle">
+                            Sample 1
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            Sample 2
+                        </figcaption>
+                    </td>
+
+                    <td>
+                        <figcaption align="middle">
+                            Sample 3
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            Sample 4
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            Sample 5
+                        </figcaption>
+                    </td>
+
+                </tr>
+            </table>
+        </div>
+
+        <h3 align="middle">
+            6. Classifier-Free Guidance (CFG)
+        </h3>
+
+        <div align="middle">
+            <p>
+                You may notice that a couple of the images, or parts of the images
+                above seem unclear in what they are depicting. We aim to make
+                the quality of these images better, and have more comprehensible
+                results, by employing a technique called "classifier-free guidance."
+            </p>
+            
+            <p>
+                We estimate both a conditional noise estimate $\epsilon_c $ and unconditional noise estimate $\epsilon_u $, such that our final
+                output noise is
+            </p>
+            <div class="mathjax">
+                \[
+                \epsilon = \epsilon_u + \gamma
+        (\epsilon_c - \epsilon_u) \tag{A.4}
+                \]
+            </div>
+            <p>
+                where $\gamma$ is the strength of the classifier free guidance.
+                We end up having higher quality images when $\gamma > 1$. We implement
+                CFG into our iterative denoiser, with $\gamma = 7$ 
+            </p>
+            <p>
+                Here are some results:
+            </p>
+            <table>
+                <tr>
+                    <td>
+                        <img src="images/parta/6/1.png" alt="" width="200px">
+                    </td>
+                    <td>
+                        <img src="images/parta/6/2.png" alt="" width="200px">
+                    </td>
+                    <td>
+                        <img src="images/parta/6/3.png" alt="" width="200px">
+                    </td>
+                    <td>
+                        <img src="images/parta/6/4.png" alt="" width="200px">
+                    </td>
+                    <td>
+                        <img src="images/parta/6/5.png" alt="" width="200px">
+                    </td>
+                </tr>
+                <tr>
+                   
+                    <td>
+                        <figcaption align="middle">
+                            Sample 1
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            Sample 2
+                        </figcaption>
+                    </td>
+
+                    <td>
+                        <figcaption align="middle">
+                            Sample 3
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            Sample 4
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            Sample 5
+                        </figcaption>
+                    </td>
+
+                </tr>
+            </table>
+            <p>
+                These images look way more clear and comprehensible than the ones
+                generated without CFG!
+            </p>
+        </div>
+       
+        <h3 align="middle">
+            7. Image-to-image Translation
+        </h3>
+
+        <div align="middle">
+            <p>
+                With CFG, we noise a test image a little, then force it back on the natural 
+                image manifold in a certain amount of timesteps. We call this algorithm SDEdit. Here are some results noising our image at various noise 
+                levels defined at different starting indices for strided_timesteps:
+            </p>
+            <table>
+                <tr>
+                    <td>
+                        <b width="100px">
+                            Campanile
+                        </b>
+                    </td>
+                    <td>
+                        <img src="images/parta/original/campanile.png" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7/campanile/1.png" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7/campanile/3.png" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7/campanile/5.png" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7/campanile/7.png" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7/campanile/10.png" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7/campanile/20.png" alt="" width="100px">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>Ghiradelli Square</b>
+                    </td>
+                    <td>
+                        <img src="images/parta/original/ghiradelli.jpg" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7/ghiradelli/1.png" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7/ghiradelli/3.png" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7/ghiradelli/5.png" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7/ghiradelli/7.png" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7/ghiradelli/10.png" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7/ghiradelli/20.png" alt="" width="100px">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>Water tower</b>
+                    </td>
+                    <td>
+                        <img src="images/parta/original/watertower.jpg" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7/watertower/1.png" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7/watertower/3.png" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7/watertower/5.png" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7/watertower/7.png" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7/watertower/10.png" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7/watertower/20.png" alt="" width="100px">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            Original Image
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            SDEdit with <code>i_start=1</code>
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            SDEdit with <code>i_start=3</code>
+                        </figcaption>
+                    </td>
+
+                    <td>
+                        <figcaption align="middle">
+                            SDEdit with <code>i_start=5</code>
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            SDEdit with <code>i_start=7</code>
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            SDEdit with <code>i_start=10</code>
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            SDEdit with <code>i_start=20</code>
+                        </figcaption>
+                    </td>
+
+                </tr>
+            </table>
+            <p>
+                We can also play around and draw images on our own, or find images on the internet, and pass it through the model
+                to see what the computer predicts the image will end up being:
+            </p>
+            <table>
+                <tr>
+                    <td>
+                        <b>Tomato carrot</b>
+                    </td>
+                    <td>
+                        <img src="images/parta/7.1/drawn1/original.png" alt="" width="100px" align="middle">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.1/drawn1/1.png" alt="" width="100px" align="middle">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.1/drawn1/3.png" alt="" width="100px" align="middle">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.1/drawn1/5.png" alt="" width="100px" align="middle">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.1/drawn1/7.png" alt="" width="100px" align="middle">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.1/drawn1/10.png" alt="" width="100px" align="middle">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.1/drawn1/20.png" alt="" width="100px" align="middle">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>Mysterious guy</b>
+                    </td>
+                    <td>
+                        <img src="images/parta/7.1/drawn2/original.png" alt="" width="100px" align="middle">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.1/drawn2/1.png" alt="" width="100px" align="middle">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.1/drawn2/3.png" alt="" width="100px" align="middle">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.1/drawn2/5.png" alt="" width="100px" align="middle">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.1/drawn2/7.png" alt="" width="100px" align="middle">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.1/drawn2/10.png" alt="" width="100px" align="middle">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.1/drawn2/20.png" alt="" width="100px" align="middle">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>Galaxy</b>
+                    </td>
+                    <td>
+                        <img src="images/parta/7.1/fromweb/original.png" alt="" width="100px" align="middle">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.1/fromweb/1.png" alt="" width="100px" align="middle">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.1/fromweb/3.png" alt="" width="100px" align="middle">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.1/fromweb/5.png" alt="" width="100px" align="middle">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.1/fromweb/7.png" alt="" width="100px" align="middle">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.1/fromweb/10.png" alt="" width="100px" align="middle">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.1/fromweb/20.png" alt="" width="100px" align="middle">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            Original Image
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            SDEdit with <code>i_start=1</code>
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            SDEdit with <code>i_start=3</code>
+                        </figcaption>
+                    </td>
+
+                    <td>
+                        <figcaption align="middle">
+                            SDEdit with <code>i_start=5</code>
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            SDEdit with <code>i_start=7</code>
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            SDEdit with <code>i_start=10</code>
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            SDEdit with <code>i_start=20</code>
+                        </figcaption>
+                    </td>
+                </tr>
+            </table>
+            <p>
+                We can also perform this algorithm on a portion of our image instead of the entire image.
+                This is called inpainting.
+                We mask out the part of the image that we want to noise and denoise by setting the mask's
+                value to 0 if we want the same content, and 1 if we want to generate something new in the denoising loop. 
+            </p>
+            <p>
+                Here are some inpainting results:
+            </p>
+            <table>
+                <tr>
+                    <td>
+                        <img src="images/parta/original/campanile.png" alt="" width="150px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.2/campanile_mask.png" alt="" width="150px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.2/campanile_replace.png" alt="" width="150px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.2/campanile.png" alt="" width="150px">
+                    </td>
+                    
+                </tr>
+                <tr>
+                    <td>
+                        <img src="images/parta/original/cat.png" alt="" width="150px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.2/cat_mask.png" alt="" width="150px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.2/cat_replace.png" alt="" width="150px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.2/cat.png" alt="" width="150px">
+                    </td>
+                   
+                </tr>
+                <tr>
+                    <td>
+                        <img src="images/parta/original/watertower.jpg" alt="" width="150px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.2/watertower_mask.png" alt="" width="150px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.2/watertower_replace.png" alt="" width="150px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.2/watertower.png" alt="" width="150px">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <figcaption align="middle">
+                            Original image
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            Mask
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            Portion to replace
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            Inpainted image
+                        </figcaption>
+                    </td>
+                </tr>
+            </table>
+            <p>
+                Instead of using our default prompt, <code>a high quality photo</code>, 
+                we can change the prompt and generate different looking results combined with 
+                inpainting. We show the result of CFG at different noise levels determined by 
+                <code>i_start</code> and a few chosen prompts:
+            </p>
+            <table>
+                <tr>
+                    <td>
+                        <b>
+                            A rocket ship
+                        </b>
+                    </td>
+                    <td>
+                        <img src="images/parta/original/campanile.png" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.3/campanilerocket/20.png" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.3/campanilerocket/10.png" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.3/campanilerocket/7.png" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.3/campanilerocket/5.png" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.3/campanilerocket/3.png" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.3/campanilerocket/1.png" alt="" width="100px">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>
+                            A photo of a hipster barista
+                        </b>
+                    </td>
+                    <td>
+                        <img src="images/parta/7.3/coffeebarista/coffee.jpg" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.3/coffeebarista/20.png" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.3/coffeebarista/10.png" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.3/coffeebarista/7.png" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.3/coffeebarista/5.png" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.3/coffeebarista/3.png" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.3/coffeebarista/1.png" alt="" width="100px">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>
+                            A pencil
+                        </b>
+                    </td>
+                    <td>
+                        <img src="images/parta/7.3/sfpencil/sf.jpg" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.3/sfpencil/20.png" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.3/sfpencil/10.png" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.3/sfpencil/7.png" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.3/sfpencil/5.png" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.3/sfpencil/3.png" alt="" width="100px">
+                    </td>
+                    <td>
+                        <img src="images/parta/7.3/sfpencil/1.png" alt="" width="100px">
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <figcaption align="middle">
+                            Original image
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                          <code> i_start=20</code> 
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            <code> i_start=10</code> 
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            <code> i_start=7</code> 
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            <code> i_start=5</code> 
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            <code> i_start=3</code> 
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            <code> i_start=1</code> 
+                        </figcaption>
+                    </td>
+                </tr>
+            </table>
+
+        </div>
+       
+        <h3 align="middle">
+            8. Visual Anagrams
+        </h3>
+
+        <div align="middle">
+            <p>
+                We can also generate optical illusions with our diffusion model. We will generate
+                an image that looks like one prompt when right-side up, but when flipped upside
+                down, it'll look like something else! In order to do so, we generate the predicted
+                noise for the right-side up prompt and the upside-down prompt, average the two,
+                and iteratively denoise our image. Our noise will be calculated as such:
+            </p>
+            <div class="mathjax">
+                \[
+                \epsilon_1 = \text{UNet}(x_t, t, p_1)
+                \]
+                \[
+                \epsilon_2 = \text{flip}(\text{UNet}(\text{flip}(x_t), t, p_2))
+                \]
+                \[
+                \epsilon = (\epsilon_1 + \epsilon_2) / 2
+                \]
+                
+            </div>
+            <p>
+                Here are some visual results:
+            </p>
+            <table>
+                <tr>
+                    <td>
+                       <b> Right side up</b>
+                    </td>
+                    <td>
+                        <img src="images/parta/8/dogmanhat.png" alt="" width="200px">
+                    </td>
+                    <td>
+                        <img src="images/parta/8/oldmanfireplace.png" alt="" width="200px">
+                    </td>
+                    <td>
+                        <img src="images/parta/8/snowyvillagewaterfalls.png" alt="" width="200px">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>Upside down</b>
+                    </td>
+                    <td>
+                        <img src="images/parta/8/dogmanhat.png" alt="" width="200px" style="transform: rotate(180deg);">
+                    </td>
+                    <td>
+                        <img src="images/parta/8/oldmanfireplace.png" alt="" width="200px" style="transform: rotate(180deg);">
+                    </td>
+                    <td>
+                        <img src="images/parta/8/snowyvillagewaterfalls.png" alt="" width="200px" style="transform: rotate(180deg);">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>Prompts</b>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            a photo of a dog,
+                         <br>
+                         <br>
+                            a man wearing a hat
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                        an oil painting of people <br> around a campfire,
+                           <br>
+                           <br>
+                            an oil painting of an old man
+                        </figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">
+                            an oil painting of a <br>
+                            snowy mountain village
+                            <br>
+                            <br>
+                            a lithograph of waterfalls
+                        </figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <h3 align="middle">
+            9. Hybrid Images
+        </h3>
+
+        <div align="middle">
+            <p>
+                We can also create hybrid images, such that it looks like one prompt looking close up and another prompt
+                looking far away. This is a concept we have explored extensively in earlier projects. High frequencies
+                tend to dominate our interpretation of an image when we look at it up closer, and low frequencies 
+                dominate when we look at it far away.
+            </p>
+            <p>
+                This is how we will calculate the predicted noise at each timestep:
+            </p>
+            <div class="mathjax">
+                \[
+                \epsilon_1 = \text{UNet}(x_t, t, p_1)
+                \]
+                \[
+                \epsilon_2 = \text{UNet}(x_t, t, p_2)
+                \]
+                \[
+                \epsilon = f_\text{lowpass}(\epsilon_1) + f_\text{highpass}(\epsilon_2)
+                \]
+            </div>
+            <p>
+                The above calculations for noise are described as follows: utilizing this idea, we predict the noise of the image for prompt 1 at low frequencies-in other
+                words, we take a Gaussian blur of the directly predicted noise from prompt 1
+                to filter out high frequencies within that noise. For prompt 2, we predict the noise of that
+                image at high frequencies. In other words, we subtract the predicted noise for prompt 1 from the 
+                blurred predicted noise for prompt 1 to get only the high frequencies.
+            </p>
+            <p>
+                We add the resulting noises together to get the predicted noise that we will use for iterative
+                denoising.
+            </p>
+            <table>
+                <tr>
+                    <td>
+
+                    </td>
+                    <td>
+                        <img src="images/parta/9/amalficoastbarista.png" alt="" width="220px">
+                    </td>
+                    <td>
+                        <img src="images/parta/9/skullwaterfall.png" alt="" width="220px">
+                    </td>
+                    <td>
+                        <img src="images/parta/9/waterfalldog.png" alt="" width="220px">
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <b align="middle">
+                            Low freq
+                            <br>
+                            High freq
+                        </b>
+                    </td>
+                    <td align="middle">
+                        <figcaption align="middle">
+                            a photo of the amalfi cost 
+                            <br>
+                            a photo of a hipster barista
+                        </figcaption>
+                    </td>
+                    <td align="middle">
+                        <figcaption align="middle">
+                            a lithograph of skulls
+                            <br>
+                            a lithograph of waterfalls
+                        </figcaption>
+                    </td>
+                    <td align="middle">
+                        <figcaption align="middle">
+                            a lithograph of waterfalls
+                            <br>
+                            a photo of a dog
+                        </figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <br>
+        <hr>
+        <br>
+
+        <!-- End of part A -->
+
+         <!-- Beginning of Part B -->
+        <h2 align="middle">
+            Part B: Diffusion Models from Scratch!
+        </h2>
+        <p>
+            Now, we implement three different UNets from scratch--unconditioned, time-conditioned,
+            and class-conditioned. The class-conditioned Unet is also time-conditioned. In the process,
+            we are also implementing DDPM as a wrapper for our UNet based upon 
+            <a href="https://arxiv.org/abs/2006.11239">this paper</a>, and are training solely
+            on the MNIST dataset.
+        </p>
+        
+        <h3 align="middle">
+            Unconditional UNet
+        </h3>
+
+        <div align="middle">
+           <p>
+            The implemented UNet has the following structure:
+           </p>
+           <img src="images/partb/webimages/unconditional_arch.png" alt="" width="800px">
+           <p>
+            where
+           </p>
+           <img src="images/partb/webimages/atomic_ops_new.png" alt="" width="800px">
+        <p>
+            We used this unconditioned UNet as a one-step denoiser, optimized on an L2 loss
+        </p>
+        <div class="mathjax">
+            \[
+            L = \mathbb{E}_{z,x} \|D_{\theta}(z) - x\|^2 \tag{B.1}
+            \]
+        </div>
+        <p>
+            where $z$ is our noisy image, and $x$ is the clean image. We can generate
+            such an image $z$ in the forward pass by adding some noise $\epsilon$ with
+            percentage amount $\sigma$ such that
+        </p>
+        <div class="mathjax">
+            \[
+            z = x + \sigma \epsilon,\quad \text{where }\epsilon \sim N(0, I). \tag{B.2}
+            \]
+        </div>
+        <p>
+            Here are the results of applying noise onto a clean image with varying amounts
+            of $\sigma$
+        </p>
+        <img src="images/partb/1.2/noises.png" alt="" width="700px">
+
+        <p>
+            We trained our UNet on noisy images from the MNIST dataset with $\sigma = 0.5$, with
+            batch size of 256 over 5 epochs. We set our number of hidden dimensions to 
+            <code>D = 128</code>, and use the Adam optimizer with a learning rate of 1e-4.
+            Here is our training loss over 5 epochs:
+        </p>
+        <img src="images/partb/1.2.1/trainingloss.png" alt="" width="500px">
+        <p>
+            Here are our results after training:
+        </p>    
+        <img src="images/partb/1.2.1/1stepoch.png" alt="" width="500px">
+        <figcaption>Denoised images after 1 epoch</figcaption>
+        <img src="images/partb/1.2.1/5thepoch.png" alt="" width="500px">
+        <figcaption>Denoised images after 5 epochs</figcaption>
+        <p>
+            After 5 epochs, the output of our image becomes much clearer!
+        </p>
+        <p>
+            Let's test how well our unconditioned UNet works on images with varying 
+            noise levels, although it is trained for noise level $\sigma=0.5$:
+
+        </p>
+        <img src="images/partb/1.2.2/varyingnoise.png" alt="" width="1000px">
+        <p>
+            The output isn't looking that great for noise levels less than 0.5.
+        </p>
+    </div>
+
+    <h3 align="middle">
+        Conditional UNet
+    </h3>
+    <div align="middle">
+        <p>
+            Let's implement iterative denoising so we can get a much better output.
+            The loss function is now modified to
+        </p>
+        <div class="mathjax">
+            \[
+            L = \mathbb{E}_{\epsilon,z} \|\epsilon_{\theta}(z) - \epsilon\|^2
+    \tag{B.3}
+            \]
+        </div>
+        <p>
+            We predefine a list of parameters helping us to calculate the noise at each timestep:
+            <ol align="left">
+                <li>
+                    $\beta$ with length T, where $\beta_0 = 0.0001$ and $\beta_T = 0.02$. In between,
+                    we have equally spaced values
+                </li>
+                <li>
+                    $\alpha_t = 1 - \beta_t$
+                </li>
+                <li>
+                    $\bar\alpha_t = \prod_{s=1}^t \alpha_s$ where $s \in \{1, \cdots, t\}$
+                </li>
+            </ol>
+
+            We let $T=300$. The architecture for our time-conditioned UNet is:
+        </p>
+        <img src="images/partb/webimages/conditional_arch.png" alt="" width="800px">
+        <p>
+            We add a new operator FCBlock which works as follows;
+        </p>
+        <img src="images/partb/webimages/fc_long.png" alt="" width="800px">
+        <p>
+            In order to train our UNet, we take a batch of images and train them at 
+            randomly sampled timesteps $t$, then optimize over the loss given above to 
+            predict the noise and the subsequent denoised image and timestep $t-1$ at any given
+            $t$. We take a batch size of 128 images at a time, train over 20 epochs, 
+            with hidden dimension <code>D = 64</code>, and use the Adam optimizer
+            over an initial learning rate of 1e-3. We also use an exponential learning 
+            rate decay scheduler with a gamma of $0.1^{(1.0 / \text{num_epochs})}$.
+            Here is our training loss, and resulting images after training our model
+            5 epochs in, and 20 epochs in:
+        </p>
+        <img src="images/partb/2.3/trainingloss.png" alt="" width="500px">
+        <figcaption>
+            Training loss of the time conditioned UNet over 20 epochs 
+        </figcaption>
+
+        <img src="images/partb/2.3/5epochs.png" alt="" >
+        <figcaption>
+            Generated images after training on 5 epochs
+        </figcaption>
+
+        <img src="images/partb/2.3/20epochs.png" alt="" >
+        <figcaption>
+            Generated images after training on 20 epochs
+        </figcaption>
+        <p>
+            These look great, but some of the generated numbers
+            look pretty incomprehensible. Similar to part A, we can 
+            apply class conditioning and train our results on a 
+            set of labels in order to improve our output.
+        </p>
+    </div>
+    <h3 align="middle">
+        Class-conditioned UNet
+    </h3>
+    <div align="middle">
+        <p>
+            Refer to Part A's description on classifier-free guidance. We use 
+            a gamma value of 5 in our implementation of class-conditioning with the
+            same parameters as the time-conditioned UNet. We also insert 
+            two more FCBlocks for our class-conditioning one-hot vector c in our architecture so that
+            for FCBlock-applied c1, c2, t1, and t2,
+        </p>
+        <div>
+            <code>
+                unflatten = c1 * unflatten + t1
+            </code>
+            and 
+            <code>
+                up1 = c2 * up1 + t1
+            </code>
+        </div>
+        <p>
+            Here are the results:
+        </p>
+        <img src="images/partb/2.5/trainingloss.png" alt="" width="">
+        <figcaption>
+            Training loss over 20 epochs of class-conditioning
+        </figcaption>
+
+        <img src="images/partb/2.5/5epochs.png" alt="" width="">
+        <figcaption>
+            Generated numbers over 5 epochs of class-conditioning
+        </figcaption>
+
+        <img src="images/partb/2.5/20epochs.png" alt="" width="">
+        <figcaption>
+            Generated numbers over 20 epochs of class-conditioning
+        </figcaption>
+        <p>
+            Our numbers look more clear and comprehensible!
+        </p>
+    </div>
+
+        <!--  End of part B -->
+
+    <h2 align="middle">
+        Bells and Whistles
+    </h2>
+    <div align="center">
+        <p>
+            A gif of denoising a class-conditioned sample every 30 timesteps. Hover over:
+        </p>
+            <img 
+            src="images/partb/bellsnwhistles/epoch5.jpg" 
+            data-gif="images/partb/bellsnwhistles/class_conditional_diffusion5epochs.gif" 
+            alt="Hover to play"
+            onmouseover="this.src=this.getAttribute('data-gif')" 
+            onmouseout="this.src='images/partb/bellsnwhistles/epoch5.jpg'"
+            />
+        
+        <figcaption>Over 5 epochs</figcaption>
+
+        <img 
+        src="images/partb/bellsnwhistles/epoch20.jpg" 
+        data-gif="images/partb/bellsnwhistles/classconditional20epochs.gif" 
+        alt="Hover to play"
+        onmouseover="this.src=this.getAttribute('data-gif')" 
+        onmouseout="this.src='images/partb/bellsnwhistles/epoch20.jpg'"
+        />
+        <figcaption>Over 20 epochs</figcaption>
+
+    </div>
+
+    </body>
+</html>
