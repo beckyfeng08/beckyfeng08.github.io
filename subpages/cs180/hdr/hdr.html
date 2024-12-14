@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="../cs180.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+        
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async=async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+    </script>
+    </head>
+
+    <body>
+
+        <h1 align="middle">High Dynamic Range Imaging</h1>
+        <h2 align="middle">CS 180: Computer Vision and Computational Photography, Fall 2024</h1>
+        <h2 align="middle">Rebecca Feng and Austin Zhu</h2>
+
+        <p>
+            In this project, we recover the full dynamic range of the world that is unable to be captured by
+            cameras. By using multiple exposures of the same image, we can recover a high dynamic range photo 
+            for many images. This project follows the algorithms outlined in 
+            <a href="http://www.pauldebevec.com/Research/HDR/debevec-siggraph97.pdf">Debevec and Malik 1997</a>
+            and <a href="http://people.csail.mit.edu/fredo/PUBLI/Siggraph2002/DurandBilateral.pdf">Durand 2002</a>.
+            <br><br>
+            An example of the different exposure images are shown below for the St. Louis Arch:
+        </p>
+
+        <div align="middle"></div>
+            <table style="width:100%">
+                <tbody>
+                    <tr align="center">
+                        <td>
+                            <img src="images/arch_original/1_25.jpg" align="middle" width="200vw">
+                            <figcaption align="middle">
+                                1/25 second exposure.
+                            </figcaption>
+                        </td>
+                        <td>
+                            <img src="images/arch_original/1_4.jpg" align="middle" width="200vw">
+                            <figcaption align="middle">
+                                1/4 second exposure.
+                            </figcaption>
+                        </td>
+                        <td>
+                            <img src="images/arch_original/3_1.jpg" align="middle" width="200vw">
+                            <figcaption align="middle">
+                                3 seconds exposure.
+                            </figcaption>
+                        </td>
+                        <td>
+                            <img src="images/arch_original/17_1.jpg" align="middle" width="200vw">
+                            <figcaption align="middle">
+                                17 seconds exposure.
+                            </figcaption>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <h2 align="middle">Recovering a Radiance Map from a Collection of Images</h2>
+        First, we want to construct an HDR radiance map from several LDR exposures, where the image pixel values (\(Z_{ij}\))
+        are a function of our scene radiance (\(E_i\)) and exposure duration (\(\Delta t_j\)), \(Z_{ij} = f(E_i \Delta t_j)\).
+        We ultimately want to solve for the log radiance values using \(g = ln(f^{-1})\), so then
+        we have the relation \(g(Z_{ij}) = ln(E_i) + ln(t_j)\).
+        
+        <h3 align="left">Solving for g</h3>
+        In order to solve for \(g\), Debevec finds the values of \(g(Z_i)\) and \(ln(E_i)\) which
+        minimizes the following quadratic objective function:
+        $$\mathcal{O} = \sum_{i=1}^N\sum_{j=1}^P \{w(Z_{ij})[g(Z_{ij} - ln(E_i) - ln\Delta t_j]\}^2 + 
+        \lambda \sum_{i=Z_{min}+1}^{Z_max-1}[w(z)g''(z)]^2$$
+        noting that:
+        <ul>
+            <li>\(i\) indexes the pixel locations and \(j\) indexes the images.</li>
+            <li>\(w(\cdot)\) is a weighting function (in this case, a triangle function) which reduces
+                the contribution of extreme pixel values due to issues of noise and saturation.
+            </li>
+            <li>The \(\lambda\) enforces smoothness of \(g\) through its second derivative. The second 
+                derivative is approximated by \(g''(x) = g(x-1) - 2g(x) + g(x+1)\).
+            </li>
+        </ul>
+
+        This minimization problem reduces to the solving of an overdetermination linear system of equations,
+        which we solve using the provided MATLAB pseudocode from Debevec.
+        <div align="middle">
+            <img src="images/solve_g_psuedocode.png" alt="" width="300px">
+            <figcaption>Debevec pseudocode for solving for g.</figcaption>
+        </div>
+
+        Running our code on the arch photos, we obtain the following functions of g for our RGB channels:
+        <div align="middle">
+            <img src="images/arch/arch_g.png" alt="" width="600px">
+            <figcaption>g function curves for the arch photos.</figcaption>
+        </div>
+
+        <h3 align="left">Recovering Our Scene Radiances</h3>
+        Now that we have our \(g\) functions, we can find our log radiances by rearranging the terms to get
+        \(ln(E_i) = g(Z_{ij}) - ln(\Delta t_j)\). But taking into account our weighting function \(w(\cdot)\) again,
+        we get the equation from Debevec:
+        $$ln(E_i) = \frac{\sum_{j=1}^P w(Z_{ij})(g(Z_{ij})-ln\Delta t_j)}{\sum_{j=1}^P w(Z_{ij})}$$
+        Then, we simply need to exponentiate in order to construct our scene radiances. The results of applying
+        this algorithm to the arch photos is shown below:
+        <div align="middle">
+            <img src="images/arch/arch_radmap.png" alt="" width="800px">
+            <figcaption>Radiance maps for the arch photos.</figcaption>
+        </div>
+
+        <h2 align="middle">Converting This Radiance Map into a Display Image</h2>
+        Now that we have our radiance maps, we need to properly display our images using the results.
+        This will involve performing transforms on our radiance values, followed by stretching the intensity
+        values to fill the whole [0 255] range.
+        <br><br>
+        For our project, we consider the following three transformations:
+        <ul>
+            <li>
+                Global Scale: the naive solution of simply linearly mapping our intensity values
+                from 0 to 1.
+            </li>
+            <li>
+                Global Simple: applying the transformation \(L/(1+L)\) onto our radiance values, then
+                stretching the values.
+            </li>
+            <li>
+                Durand: here we implement a simplified version of the algorithm outlined in Durand 2002,
+                with the following steps with our RVG values of radiance as inputs:
+                <ol>
+                    <li>Replace zeros with some small number.</li>
+                    <li>Compute the intensity (I) by taking a weighted average of the color channels
+                        to scale for human perception. Weights taken from <a href="https://docs.opencv.org/2.4/modules/imgproc/doc/miscellaneous_transformations.html#void%20cvtColor(InputArray%20src,%20OutputArray%20dst,%20int%20code,%20int%20dstCn)">OpenCV</a>.</li>
+                    <li>Compute the chrominance channels: (R/I, G/I, B/I).</li>
+                    <li>Compute the log intensity: L = log2(I).</li>
+                    <li>Filter it with a bilateral filter: B=bf(L). Note we use <code>cv2.bilateralFilter</code>
+                    with the parameters <code>d=9, sigmaColor=75, sigmaSpace=75</code>.</li>
+                    <li>Compute the detail layer: D = L - B.</li>
+                    <li>Apply an offset and scale to the base: B' = (B-o)*s. Note \(o=max(B)\) so the max intensity is 1
+                    and \(s=\frac{dR}{max(B)-min(B)}\) where we use \(dR=5\).</li>
+                    <li>Reconstruct the log intensity: O = 2^(B'+D).</li>
+                    <li>Put back the colors: R',G',B'=O*(R/I, G/I, B/I).</li>
+                    <li>Apply gamma compression by taking the square root of all values.</li>
+                </ol>
+            </li>
+        </ul>
+
+        Applying these transformations to our arch photos again, we obtain the following results:
+        <div align="middle">
+            <img src="images/arch/arch_global.png" alt="" width="900px">
+        </div>
+
+        <h3 align="middle">More test images!!</h3>
+        Below we show the results for the rest of the provided test images:
+        <br><br>
+        <b>Bonsai tree:</b>
+        <div align="middle">
+            <img src="images/bonsai/bonsai_global.png" alt="" width="900px">
+        </div>
+        <b>Chapel:</b>
+        <div align="middle">
+            <img src="images/chapel/chapel_global.png" alt="" width="900px">
+        </div>
+        <b>Garage:</b>
+        <div align="middle">
+            <img src="images/garage/garage_global.png" alt="" width="900px">
+        </div>
+        <b>Garden:</b>
+        <div align="middle">
+            <img src="images/garden/garden_global.png" alt="" width="900px">
+        </div>
+        <b>House:</b>
+        <div align="middle">
+            <img src="images/house/house_global.png" alt="" width="900px">
+        </div>
+        <b>Mug:</b>
+        <div align="middle">
+            <img src="images/mug/mug_global.png" alt="" width="900px">
+        </div>
+        <b>Window:</b>
+        <div align="middle">
+            <img src="images/window/window_global.png" alt="" width="900px">
+        </div>
+
+        A few things to note:
+        <ul>
+            <li>
+                Over the range of test images we have, the different tone mappings appear to vary
+                quite a bit in terms of quality depending on the original image. Global simple appears
+                to do well on lower light level images such as the arch, chapel, and window, while the 
+                Durand algorithm does better with higher light levels.
+            </li>
+            <li>The garden images were slightly misaligned and you see that in the blurry results.</li>
+        </ul>
+
+        Additionally, we show the bilateral filtering decomposition results into the detail and large
+        scale structure for the chapel images below:
+        <div align="middle">
+            <img src="images/chapel/chapel_bilateral.png" alt="" width="900px">
+            <figcaption>Bilateral decomposition for chapel.</figcaption>
+        </div>
+
+        <h2 align="middle">Bells & Whistles</h2>
+        For our bells and whistles, we apply our algorithms to our own images. Below are the images we 
+        used:
+        <div align="middle"></div>
+            <table style="width:100%">
+                <tbody>
+                    <tr align="center">
+                        <td>
+                            <img src="images/custom_original/1_10.jpeg" align="middle" width="300vw">
+                            <figcaption align="middle">
+                                1/10 second exposure.
+                            </figcaption>
+                        </td>
+                        <td>
+                            <img src="images/custom_original/1_5.jpeg" align="middle" width="300vw">
+                            <figcaption align="middle">
+                                1/5 second exposure.
+                            </figcaption>
+                        </td>
+                        <td>
+                            <img src="images/custom_original/1_1.jpeg" align="middle" width="300vw">
+                            <figcaption align="middle">
+                                1 second exposure.
+                            </figcaption>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        Using these different exposures, we obtain the following HDR images:
+        <div align="middle">
+            <img src="images/custom/custom_global.png" alt="" width="900px">
+        </div>
+
+    </body>
+</html>
