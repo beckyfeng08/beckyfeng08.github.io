@@ -7,16 +7,13 @@
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-        <link rel="stylesheet" href="../css/games.css">
+        <link rel="stylesheet" href="../css/computergraphics.css">
+        <link rel="stylesheet" href="../css/animation.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/octicons/12.1.0/font/octicons.min.css">
     </head>
     <body>
-        <div class="view-image">
-            <img src="../images/webimahes/profile.PNG" alt="">
-            <span>x</span>
-        </div>
-       <div class="container-fluid">
-        
+       <div class="container-fluid fade-in">
+
          <div class="heading">
                 <div class="page-divider-small"></div>
                 <div class="heading row flex-nowrap">
@@ -81,67 +78,83 @@
                         </ul>
                     </div>
                 </div>
-            </div>
+        </div>
 
         <div class="main">
-            <section id="twasanight">
-                <div style="justify-content: center; text-align: center; margin:20px;">
-                    <h4>Twas a Night (2023)</h4>
-                </div>
-                <hr>
-                <div class="row" style="justify-content: center; text-align: center; margin:20px;">
-                    <h1>coming soon!</h1>
-                </div>
-                <div class="row" style="justify-content: center; text-align: center;">
-                    <p>I led a team of 5 on this animated short that I pitched for the Fall 2023 semester as the Director, Art Director, Technical Director, and 3D artist (specifically, character sculpting/modeling, shading, skinning, and animation). 
-                        In the process, I used ZBrush, Autodesk Maya, 3D Substance Painter, and Adobe AfterEffects. Everything I worked on can be seen below.</p>
-                </div>
-                <div class="row gallery">
+            <section id="title"></section>
+                <h4>Work Samples</h4>
+                <p>
+                    Past: DreamWorks Animation Summer 2025 Intern
                     
-                    <div class="col-8">
-                        <p>Animatic:</p>
-                        <iframe width="560" height="315" src="https://www.youtube.com/embed/yEZzi8XIRto?si=UjJhOwOnSNWmcVvE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-                    </div>
-                    <div class="col-4" style="margin:auto; justify-content: center; text-align: center;">
-                        <button><a href="../twasanight/ascript.pdf">Read the screenplay here!</a></button>
-                        <button style="margin:20px;"><a href="code.html">Mirror tool</a></button>
-                  
-                    </div>
-                    <div class="image-container row d-flex" style="justify-content: center; align-items: center;  
-                height:auto;
-                margin:0px auto;">
-                    <img src="/images/twasanight/cover.jpg" alt="">
-                    <img src="/images/twasanight/set.jpg" alt="">
-                    <img src="/images/twasanight/ameliarig.png" alt="">
-                    <img src="/images/twasanight/ameliashaded.png" alt="">
-                    <img src="/images/twasanight/henryrig.png" alt="">
-                    <img src="/images/twasanight/henryshaded.png" alt="">
-                    <img src="/images/twasanight/3.jpeg" alt="">
-                    <img src="/images/twasanight/4.jpeg" alt="">
-                    <img src="/images/twasanight/assets.jpeg" alt="">
-                </div>
-                </div>
-                <div class="page-divider-small"></div>
-            </section>
+                </p>
+                <hr>
             
+            <section id="viser">
+                <div style="justify-content: center; text-align: center; margin:50px;">
+                    <h5>MoonRay GUI (DreamWorks Animation) 2025</h5>
+                    <p>
+                        I had the BEST time getting to work with the MoonRay team, under the production software 
+                        department at DreamWorks Animation. Throughout the internship, I mostly worked within the 
+                        MoonRay GUI codebase, which displays renders from MoonRay. It is primarily a C++ developer tool 
+                        that uses QT for the GUI.
+                    </p>
+                    <p>
+                        My task was to phase out QT and upgrade it to an ImGUI application. A couple of reasons why the team
+                        wanted me to do so:
+                        <ol style="color: gray;">
+                            <li>
+                                More control with integrating Apple's graphics API Metal into MoonRay GUI for screen display
+                            </li>
+                            <li>
+                                Load a new scene file while still being able to interact with
+                                the current one (heavy scene files can take up to 30 minutes to load)
+                            </li>
+                            <li>
+                                Add intuitive menu items and windows to click on instead of purely using hotkeys to navigate the screen
+                            </li>
+                        </ol>
+                    </p>
+                    <p>
+
+                        Shown below in the demo reel are all the features I worked on, as well as a prototype
+                        look of the final application. This project is still a work-in-progress.
+                        This was briefly presented at <a href="https://s2025.conference-schedule.org/presentation/?id=bof_199&sess=sess516">
+                            ACM SIGGRAPH 2025 OpenMoonRay Birds of a Feather </a> talk by Randy Packer (Senior Manager R&D @ DreamWorks Animation).
+
+                        <div class="container">
+                            <div class="row">
+                               <div class="col-md-6 p-3 ">
+                                    <a href="https://openmoonray.org"> OpenMoonRay site</a>
+                                </div>
+                                <div class="col-md-6  p-3 ">
+                                    <a href="https://github.com/dreamworksanimation/moonray_gui/tree/000130671788b3046ebf87d759732ba9a18c6f9b">
+                                        MoonRay GUI GitHub
+                                    </a>  
+                                </div>
+                            </div>
+                            <div class="row">
+                               <div class="col-md-2 p-3 ">
+                                <!-- we need this empty div to keep the video center on hte screen -->
+                                </div>
+                                <div class="col-md-8 p-3 ">
+
+                                    <iframe width="600" height="420" src="https://www.youtube.com/embed/PJvsR3l3VvQ?si=WvAJH8tNItSyYwdO" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                                </div>
+                                
+                            </div>
+
+                        </div>
+                    </p>
+                    
+                        <div style="justify-content: center; text-align: center">
+                        </div>
+        
+                    </div>
+            </section>
+           
+               
+            <div class="page-divider-small"></div>
 
         </div>
-        <script>
-            let images=document.querySelectorAll(".image-container img");
-            let viewImage= document.querySelector(".view-image");
-            let fullImage = document.querySelector(".view-image img");
-            for (let image of images) {
-                image.addEventListener("click", function(e) {
-                    
-                    viewImage.style.display = "flex";
-                    fullImage.src = e.target.src;
-                })
-            }
-
-            let x = document.querySelector(".view-image span");
-            x.addEventListener("click", function(e) {
-                viewImage.style.display = "none";
-            })
-        </script>
     </body>
 </html>

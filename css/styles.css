@@ -1,7 +1,9 @@
 
 ul {
   list-style: none;
+  
 }
+
 a {
   color: rgb(120, 138, 121); /* Change the color to black */
   text-decoration: underline; /* Add underline */
